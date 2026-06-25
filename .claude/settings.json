@@ -1,5 +1,5 @@
 {
-  "$comment": "Project hooks for DayONE. PostToolUse enforces the Google TypeScript Style Guide by auto-formatting and lint-fixing every file Claude edits. UserPromptSubmit runs the (opt-in) prompt-polish helper and skill-activation. PreToolUse branch-guard blocks direct commits/pushes to master. An optional lint gate lives in package.json scripts (npm run lint).",
+  "$comment": "Project hooks for DayONE. PostToolUse enforces the Google TypeScript Style Guide by auto-formatting and lint-fixing every file Claude edits. UserPromptSubmit runs skill-activation. PreToolUse branch-guard blocks direct commits/pushes to master. An optional lint gate lives in package.json scripts (npm run lint).",
   "hooks": {
     "PostToolUse": [
       {
@@ -13,15 +13,6 @@
       }
     ],
     "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/prompt-polish-auto.sh",
-            "timeout": 10000
-          }
-        ]
-      },
       {
         "hooks": [
           {
