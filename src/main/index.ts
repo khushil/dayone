@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { readDataFromDisk } from './data';
 import { refreshData } from './refresh';
+import { initAutoUpdater } from './updater';
 
 /** Security baseline (FR-11). A regression here fails the startup assertion. */
 const SECURE_WEB_PREFERENCES = {
@@ -120,6 +121,11 @@ app.whenReady().then(() => {
   ipcMain.handle('sectorscope:refresh-data', () => refreshData());
 
   createWindow();
+
+  // Check for in-place updates (packaged builds only).
+  if (app.isPackaged) {
+    initAutoUpdater();
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
