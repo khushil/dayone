@@ -8,6 +8,12 @@ export function useLoadSectorData(): void {
   const setError = useAppStore((s) => s.setError);
 
   useEffect(() => {
+    if (!window.api?.loadData) {
+      setError(
+        'The app bridge (window.api) is unavailable — the preload script failed to load.',
+      );
+      return;
+    }
     let active = true;
     void window.api
       .loadData()
