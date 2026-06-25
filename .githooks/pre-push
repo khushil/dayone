@@ -1,0 +1,134 @@
+#!/bin/bash
+# Pre-Push Hook -- Block direct pushes to main + work-item link guard (Layer 3).
+#
+# !!MLE-MANAGED!! pre-push@v2 (US #2195 + #2199)
+#
+# Layer A (US #2195): block push to main / master.
+# Layer B (US #2199): for every pushed branch under the four MLE prefixes,
+#   call mle.core.guard.validate_branch_link() to verify ADO state and type.
+#   Cache hits at .git/mle-cache/wi-<id>.json with 5-min TTL avoid hammering
+#   ADO on every push.
+#
+# Escape hatches (Layer B only -- the main/master block always fires):
+#   - MLE_ALLOW_UNLINKED_BRANCH=1            (env var, one-shot)
+#   - git config mle.allow-unlinked true     (per-repo, persistent)
+
+PROTECTED_BRANCHES="^(main|master|v2)$"
+
+# Capture stdin (refs being pushed) so we can replay it for git lfs and the
+# Python validator.
+STDIN_LINES=$(cat)
+
+# --- Layer A: block push to main --------------------------------------------
+while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    # shellcheck disable=SC2034
+    # local_ref/local_sha/remote_sha are bound for documentation; only
+    # remote_ref is consumed by the loop body.
+    read -r local_ref local_sha remote_ref remote_sha <<<"$line"
+    remote_branch=$(echo "$remote_ref" | sed 's|refs/heads/||')
+    if echo "$remote_branch" | grep -qE "$PROTECTED_BRANCHES"; then
+        echo ""
+        echo "================================================================"
+        echo "  BLOCKED: Direct push to '$remote_branch' is not allowed."
+        echo "================================================================"
+        echo ""
+        echo "  All changes to $remote_branch must go through a pull request."
+        echo ""
+        echo "  Use a feature branch:"
+        echo "    mle work <ADO-ID>"
+        echo "    git push -u origin feature/us-<id>-<slug>"
+        echo ""
+        exit 1
+    fi
+done <<<"$STDIN_LINES"
+
+# --- Layer B: WI link validation (US #2199) ---------------------------------
+if [[ "${MLE_ALLOW_UNLINKED_BRANCH:-}" != "1" ]] \
+   && [[ "$(git config --get mle.allow-unlinked 2>/dev/null || true)" != "true" ]]; then
+    # Find a Python interpreter that can import mle.core.guard.
+    PY=""
+    for candidate in python3 python; do
+        if command -v "$candidate" >/dev/null 2>&1; then
+            PY="$candidate"
+            break
+        fi
+    done
+    if [[ -n "$PY" ]]; then
+        # Build a list of source-branch names that are being pushed so the
+        # validator can check each one.
+        BRANCH_LIST=$(awk '$1 != "" && $2 != "" {gsub("refs/heads/", "", $1); print $1}' <<<"$STDIN_LINES")
+        if [[ -n "$BRANCH_LIST" ]]; then
+            REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
+            if [[ -n "$REPO_ROOT" ]]; then
+                # Run the validator. Exit non-zero blocks the push.
+                if ! BRANCH_LIST="$BRANCH_LIST" REPO_ROOT="$REPO_ROOT" "$PY" -c '
+import os
+import sys
+
+try:
+    from mle.core.guard import (
+        LinkVerdict,
+        validate_branch_link,
+    )
+except Exception:
+    # MLE not importable -- fail open so we do not break unrelated repos.
+    sys.exit(0)
+
+from pathlib import Path
+
+repo = Path(os.environ["REPO_ROOT"])
+branches = [b.strip() for b in os.environ["BRANCH_LIST"].splitlines() if b.strip()]
+exit_code = 0
+for branch in branches:
+    if not branch.startswith(("feature/", "bugfix/", "hotfix/", "release/")):
+        # Branches outside our four prefixes are not policed by the link guard.
+        continue
+    result = validate_branch_link(branch, repo_root=repo)
+    if result.passed:
+        if result.warnings:
+            for w in result.warnings:
+                sys.stderr.write(f"  warning: {branch}: {w}\n")
+        if result.verdict == LinkVerdict.OFFLINE_OK:
+            sys.stderr.write(
+                f"  warning: pushed {branch} using stale cache (ADO unreachable)\n"
+            )
+        continue
+    sys.stderr.write("\n")
+    sys.stderr.write("================================================================\n")
+    sys.stderr.write(f"  BLOCKED (work-item link guard): {branch}\n")
+    sys.stderr.write("================================================================\n")
+    sys.stderr.write(f"  Reason: {result.reason}\n")
+    if result.warnings:
+        for w in result.warnings:
+            sys.stderr.write(f"  warning: {w}\n")
+    sys.stderr.write("\n")
+    sys.stderr.write("  Bypass: MLE_ALLOW_UNLINKED_BRANCH=1 git push ...   (one-shot)\n")
+    sys.stderr.write("  Bypass: git config mle.allow-unlinked true         (per-repo, persistent)\n")
+    sys.stderr.write("\n")
+    exit_code = 1
+sys.exit(exit_code)
+'; then
+                    exit 1
+                fi
+            fi
+        fi
+    fi
+fi
+
+# --- Git LFS pre-push --------------------------------------------------------
+# Upload LFS objects before the push completes. Without this, only pointer
+# files reach the remote and the actual binaries are lost once the local
+# clone/worktree is deleted.
+#
+# Bug #2191 (Bug 2b): only invoke `git lfs pre-push` when the repository has
+# at least one LFS-tracked file. Without this gate, the helper hangs against
+# ADO's SSH-style endpoint when the index is empty (no LFS pointers to
+# upload, but the helper still negotiates and blocks indefinitely).
+if command -v git-lfs >/dev/null 2>&1; then
+    if [[ -n "$(git lfs ls-files 2>/dev/null)" ]]; then
+        echo "$STDIN_LINES" | git lfs pre-push "$@"
+    else
+        echo "  [skip] git lfs pre-push -- no LFS-tracked files in this repo"
+    fi
+fi

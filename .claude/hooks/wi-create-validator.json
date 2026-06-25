@@ -1,0 +1,22 @@
+{
+  "_comment_purpose": "MLE wi-create-validator PreToolUse hook (Story #2260, ref Feature #2255). Intercepts raw `mcp__azure-devops__wit_create_work_item` tool calls and routes the proposed body through `mle wi validate` against `rubrics/work-item-authoring-rubric.md`. If the score is below the configured threshold (default 4.00) or any critical findings fire (unfilled placeholders, body shorter than 200 chars), the tool call is denied with the validator findings in stderr. Passive: only inspects the local payload, never exfiltrates. Pairs with the `mle-wi-create` skill and the `wi-create-gate` agent — together they form the multi-tier WI authoring scaffold (rubric + rule + 2 skills + 2 agents + this hook).",
+  "_comment_schema": "Claude Code PreToolUse hook entry. Top-level shape mirrors a single `hooks.PreToolUse` group inside `.claude/settings.json`: a `matcher` selecting the tool to intercept, plus a `hooks` list of `{type, command, timeout}` triples. The `mle init` installer either copies this file standalone (so external tooling can inspect it) and/or merges it into `.claude/settings.json` under `hooks.PreToolUse`. Hook protocol: exit 0 -> allow; exit 2 + stderr -> block with reason; any other exit -> non-blocking error.",
+  "_comment_references": [
+    "rubrics/work-item-authoring-rubric.md",
+    ".claude/rules/work-item-standards.md",
+    ".claude/skills/mle-wi-create/SKILL.md",
+    ".claude/agents/wi-create-gate.md"
+  ],
+  "_mle_managed": "wi-create-validator@v1",
+  "version": "1.0.0",
+  "event": "PreToolUse",
+  "matcher": "mcp__azure-devops__wit_create_work_item",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wi-create-validator.sh",
+      "timeout": 10000,
+      "_mle_managed": "wi-create-validator@v1"
+    }
+  ]
+}

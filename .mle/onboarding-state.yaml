@@ -1,0 +1,111 @@
+version: 1
+project_root: /home/ubuntu/src/dayone
+maturity_level: L2
+started_at: '2026-06-25T14:41:16.818289+00:00'
+last_updated: '2026-06-25T14:41:39.752484+00:00'
+completed_at: '2026-06-25T14:41:39.752401+00:00'
+completed: true
+skipped: false
+steps:
+  - id: step_1_investigation
+    title: Review Investigation Findings
+    description: Present codebase investigation results to build trust.
+    entry_criteria:
+      - init_project() has completed successfully
+      - InvestigationResult is available
+    exit_criteria:
+      - Developer has confirmed findings
+    time_budget_minutes: 3
+    required: true
+    status: complete
+    started_at: '2026-06-25T14:41:16.818351+00:00'
+    completed_at: '2026-06-25T14:41:23.860517+00:00'
+    user_responses:
+      findings_confirmed: 'yes'
+    corrections_made: 0
+  - id: step_2_maturity
+    title: Confirm Maturity Level
+    description: Explain and confirm the suggested maturity level.
+    entry_criteria:
+      - Step 1 complete or skipped
+    exit_criteria:
+      - Developer has accepted or adjusted maturity level
+    time_budget_minutes: 3
+    required: true
+    status: complete
+    started_at: '2026-06-25T14:41:23.866909+00:00'
+    completed_at: '2026-06-25T14:41:38.026080+00:00'
+    user_responses:
+      level_accepted: 'yes'
+    corrections_made: 0
+  - id: step_3_first_task
+    title: Your First Task
+    description: Recommend a concrete first action based on codebase signals.
+    entry_criteria:
+      - Step 2 complete
+    exit_criteria:
+      - Developer has received and acknowledged recommendation
+    time_budget_minutes: 2
+    required: true
+    status: complete
+    started_at: '2026-06-25T14:41:38.031381+00:00'
+    completed_at: '2026-06-25T14:41:39.739083+00:00'
+    user_responses:
+      task_accepted: 'yes'
+    corrections_made: 0
+  - id: step_4_validation
+    title: Validate Configuration
+    description: Confirm scaffolded infrastructure works.
+    entry_criteria:
+      - Step 3 complete
+    exit_criteria:
+      - Structural validation passes
+    time_budget_minutes: 2
+    required: false
+    status: complete
+    started_at: '2026-06-25T14:41:39.744808+00:00'
+    completed_at: '2026-06-25T14:41:39.746755+00:00'
+    user_responses:
+      validation_acknowledged: pass
+    corrections_made: 0
+investigation_summary:
+  detected_stacks:
+    - nodejs
+  has_readme: true
+  readme_summary:
+    "# DayONE\n\nA small, polished **cross-platform desktop app** (Windows\
+    \ 11 + macOS) that visualizes **12-month stock performance by market sector**\
+    \ \u2014 the 11 GICS sectors via their SPDR sector ETFs. Built"
+  manifests:
+    - package-lock.json
+    - package.json
+  git_initialised: true
+  commit_count: 21
+  contributor_count: 2
+  has_tests: true
+  test_directories:
+    - tests
+  test_framework: jest
+  has_ci: true
+  ci_platform: github-actions
+  ci_config_path: .github/workflows
+  top_level_dirs:
+    - build
+    - data
+    - docs
+    - features
+    - node_modules
+    - out
+    - resources
+    - scripts
+    - src
+    - tests
+  source_dirs:
+    - src
+  has_claude_config: true
+  claude_skills:
+    - google-style
+  has_mle_metadata: false
+suggested_maturity: L2
+suggested_first_task: run_verify
+time_to_activation: 22

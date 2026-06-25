@@ -53,15 +53,19 @@ describe('SecureStore (secure backend)', () => {
     });
   });
 
-  it('writes the credentials file 0600', () => {
-    const store = new SecureStore({
-      filePath: file,
-      vault: fakeVault(),
-      platform: 'linux',
-    });
-    store.setCredentials('x', { apiKey: 'k' });
-    expect(statSync(file).mode & 0o777).toBe(0o600);
-  });
+  // POSIX-only: Windows ignores chmod bits (DPAPI + ACL is the at-rest control).
+  it.skipIf(process.platform === 'win32')(
+    'writes the credentials file 0600',
+    () => {
+      const store = new SecureStore({
+        filePath: file,
+        vault: fakeVault(),
+        platform: 'linux',
+      });
+      store.setCredentials('x', { apiKey: 'k' });
+      expect(statSync(file).mode & 0o777).toBe(0o600);
+    },
+  );
 
   it('never writes the plaintext key to disk', () => {
     const store = new SecureStore({
