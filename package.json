@@ -1,6 +1,6 @@
 {
   "name": "dayone",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Track 12-month stock performance by market sector — a cross-platform desktop utility.",
   "main": "./out/main/index.js",
   "author": "Khushil Dep",
