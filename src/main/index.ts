@@ -8,6 +8,9 @@ import { initAutoUpdater } from './updater';
 import { migrateUserData } from './migrate';
 import { ProviderRegistry } from './providers/registry';
 import { YahooProvider } from './providers/yahoo';
+import { SecureStore } from './secrets/secureStore';
+import { electronVault } from './secrets/vault';
+import { registerKeyIpc } from './secrets/keyIpc';
 
 // The data-provider registry. Yahoo (keyless) is the foundation adapter;
 // keyed/streaming providers register here in later phases.
@@ -142,6 +145,14 @@ app.whenReady().then(() => {
   ipcMain.handle('dayone:load-data', () => readDataFromDisk());
   ipcMain.handle('dayone:refresh-data', () => refreshData());
   ipcMain.handle('dayone:providers-list', () => registry.describe());
+
+  // safeStorage is only valid after app-ready; the vault refuses to persist on
+  // an insecure (e.g. Linux basic_text) backend.
+  const secureStore = new SecureStore({
+    filePath: join(app.getPath('userData'), 'credentials.json'),
+    vault: electronVault(),
+  });
+  registerKeyIpc(ipcMain, registry, secureStore);
 
   createWindow();
 
