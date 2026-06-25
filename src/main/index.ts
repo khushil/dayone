@@ -6,6 +6,13 @@ import { readDataFromDisk } from './data';
 import { refreshData } from './refresh';
 import { initAutoUpdater } from './updater';
 import { migrateUserData } from './migrate';
+import { ProviderRegistry } from './providers/registry';
+import { YahooProvider } from './providers/yahoo';
+
+// The data-provider registry. Yahoo (keyless) is the foundation adapter;
+// keyed/streaming providers register here in later phases.
+const registry = new ProviderRegistry();
+registry.register(new YahooProvider());
 
 /** Security baseline (FR-11). A regression here fails the startup assertion. */
 const SECURE_WEB_PREFERENCES = {
@@ -134,6 +141,7 @@ app.whenReady().then(() => {
   // IPC: load the committed/last-good snapshot; refresh best-effort from network.
   ipcMain.handle('dayone:load-data', () => readDataFromDisk());
   ipcMain.handle('dayone:refresh-data', () => refreshData());
+  ipcMain.handle('dayone:providers-list', () => registry.describe());
 
   createWindow();
 
