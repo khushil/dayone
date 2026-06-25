@@ -1,10 +1,11 @@
 import { app, shell, BrowserWindow, ipcMain, session } from 'electron';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { readDataFromDisk } from './data';
 import { refreshData } from './refresh';
 import { initAutoUpdater } from './updater';
+import { migrateUserData } from './migrate';
 
 /** Security baseline (FR-11). A regression here fails the startup assertion. */
 const SECURE_WEB_PREFERENCES = {
@@ -116,6 +117,15 @@ app.whenReady().then(() => {
     callback(false),
   );
   applyContentSecurityPolicy();
+
+  // One-time migration of the legacy SectorScope userData dir (the rename moved
+  // app.getPath('userData') from …/SectorScope to …/DayONE). Never throws.
+  try {
+    const userDir = app.getPath('userData');
+    migrateUserData(join(dirname(userDir), 'SectorScope'), userDir);
+  } catch (err) {
+    console.error('userData migration skipped:', err);
+  }
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);
