@@ -44,3 +44,4 @@ publish:
   provider: github
   owner: khushil
   repo: dayone
+  releaseType: release
