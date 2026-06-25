@@ -9,6 +9,7 @@ import type { DayoneApi } from '../shared/types';
 const api: DayoneApi = {
   loadData: () => ipcRenderer.invoke('dayone:load-data'),
   refreshData: () => ipcRenderer.invoke('dayone:refresh-data'),
+  listProviders: () => ipcRenderer.invoke('dayone:providers-list'),
 };
 
 contextBridge.exposeInMainWorld('api', api);

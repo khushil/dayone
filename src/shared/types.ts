@@ -57,6 +57,8 @@ export interface DayoneApi {
   loadData(): Promise<RefreshResult>;
   /** Best-effort refresh from the network; keeps last-good data on failure. */
   refreshData(): Promise<RefreshResult>;
+  /** Registered data providers (metadata only — never credentials). */
+  listProviders(): Promise<Array<import('./instruments').ProviderInfo>>;
 }
 
 /** Raised when input data is missing or fails schema validation (FR-1). */
