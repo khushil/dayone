@@ -1,6 +1,6 @@
 {
   "name": "sectorscope",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Track 12-month stock performance by market sector — a cross-platform desktop utility.",
   "main": "./out/main/index.js",
   "author": "Khushil Dep",
@@ -70,6 +70,7 @@
     "jsdom": "^29.1.1",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "puppeteer": "^25.2.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "stylelint": "^17.13.0",

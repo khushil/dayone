@@ -5,3 +5,4 @@ out
 .eslintcache
 coverage
 *.log*
+node_modules

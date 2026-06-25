@@ -73,6 +73,28 @@ function createWindow(): void {
     }
   });
 
+  // Debug aids: open a detached DevTools window so the renderer console is
+  // visible, surface any load failure, and let F12 toggle DevTools in
+  // production. Disable by launching with SECTORSCOPE_DEBUG=0.
+  const openDevTools = (): void =>
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  if (process.env['SECTORSCOPE_DEBUG'] !== '0') {
+    mainWindow.webContents.once('did-finish-load', openDevTools);
+  }
+  mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) => {
+    console.error(`Renderer failed to load (${code} ${desc}) ${url}`);
+    openDevTools();
+  });
+  mainWindow.webContents.on('render-process-gone', (_e, details) => {
+    console.error('Renderer process gone:', details.reason);
+    openDevTools();
+  });
+  mainWindow.webContents.on('before-input-event', (_e, input) => {
+    if (input.type === 'keyDown' && input.key === 'F12') {
+      mainWindow.webContents.toggleDevTools();
+    }
+  });
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     void mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
