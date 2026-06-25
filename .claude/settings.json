@@ -1,0 +1,16 @@
+{
+  "$comment": "Project hooks for SectorScope. The PostToolUse hook enforces the Google TypeScript Style Guide by auto-formatting and lint-fixing every file Claude edits, surfacing any residual violations. An optional pre-commit gate lives in package.json scripts (npm run lint) — kept out of the hook so a red lint never blocks a live edit.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-format.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

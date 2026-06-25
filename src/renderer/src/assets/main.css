@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+/*
+ * SectorScope design system — a refined "market terminal".
+ * Tokens are CSS custom properties so light/dark and the colorblind-safe
+ * (CVD) mode can swap them at runtime via [data-theme] / [data-cvd].
+ */
+
+@theme {
+  --color-ink: #0d1117;
+  --color-surface: #161b22;
+  --color-line: #222a33;
+  --color-gain: #3fb68b;
+  --color-loss: #e0604a;
+  --color-accent: #c8a45c;
+  --color-text: #e6edf3;
+  --color-muted: #8a93a0;
+
+  --font-display: 'Fraunces Variable', georgia, 'Times New Roman', serif;
+  --font-sans: 'Geist Variable', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', monospace;
+}
+
+/* Light theme — explicit values, both pairings checked for WCAG AA. */
+[data-theme='light'] {
+  color-scheme: light;
+  --color-ink: #f7f6f2;
+  --color-surface: #fff;
+  --color-line: #e4e1d8;
+  --color-gain: #1f8f68;
+  --color-loss: #c2402b;
+  --color-accent: #9a7728;
+  --color-text: #1b2027;
+  --color-muted: #5d6671;
+}
+
+/* Colorblind-safe mode — swap the red/green axis for a CVD-safe blue/amber. */
+[data-cvd='true'] {
+  --color-gain: #4c8dff;
+  --color-loss: #f0a93b;
+}
+
+[data-theme='light'][data-cvd='true'] {
+  --color-gain: #1f6fe0;
+  --color-loss: #b8791a;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizelegibility;
+  overflow: hidden;
+}
+
+/* Tabular, slashed-zero figures for every number in the terminal. */
+@utility tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings:
+    'tnum' 1,
+    'zero' 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
