@@ -12,4 +12,9 @@ afterEach(() => {
 window.api = {
   loadData: vi.fn(async () => ({ ok: false, reason: 'not stubbed' })),
   refreshData: vi.fn(async () => ({ ok: false, reason: 'not stubbed' })),
+  listProviders: vi.fn(async () => []),
+  keysStatus: vi.fn(async () => ({ secure: true, hasKey: {} })),
+  setKey: vi.fn(async () => ({ persisted: true })),
+  clearKey: vi.fn(async () => undefined),
+  validateKey: vi.fn(async () => ({ valid: true })),
 };
