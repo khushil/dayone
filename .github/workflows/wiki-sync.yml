@@ -1,0 +1,55 @@
+name: Wiki sync
+
+# Regenerate the GitHub Wiki from repo sources on every relevant change.
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/**'
+      - '.claude/**'
+      - 'CLAUDE.md'
+      - '**/CLAUDE.md'
+      - 'README.md'
+      - 'scripts/build-wiki.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Clone the wiki (no-op if uninitialised)
+        id: wiki
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git clone "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki 2>/dev/null; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Wiki not initialised — create the first page once via the GitHub UI, then this job will keep it in sync. Skipping."
+            echo "ok=0" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Generate wiki pages
+        if: steps.wiki.outputs.ok == '1'
+        run: node --import tsx scripts/build-wiki.ts wiki
+      - name: Commit + push if changed
+        if: steps.wiki.outputs.ok == '1'
+        working-directory: wiki
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "wiki already up to date"
+          else
+            git commit -m "docs: sync wiki from repo [skip ci]"
+            git push
+          fi
