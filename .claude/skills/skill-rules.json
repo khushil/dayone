@@ -1,0 +1,860 @@
+{
+  "version": "3.0",
+  "_generated_by": "mle skill compile-rules",
+  "skills": {
+    "forge": {
+      "archetype": "orchestrator",
+      "intent_patterns": ["/forge\\s+\\w+", "run\\s+(a\\s+)?forge"],
+      "keywords": ["forge", "orchestrator", "multi-agent", "dependency graph"],
+      "name": "forge",
+      "priority": "low",
+      "type": "rigid"
+    },
+    "mle-abandon": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(abandon|discard|throw away|delete)\\s+(the\\s+)?(task|clone|branch)",
+        "(clean up|remove)\\s+(stale|old|abandoned)\\s+(clone|task)"
+      ],
+      "keywords": [
+        "abandon clone",
+        "abandon task",
+        "discard clone",
+        "remove clone",
+        "stale clones",
+        "mle abandon"
+      ],
+      "name": "mle-abandon",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-api-contract-testing": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(api|contract)\\s+(contract|compliance)?\\s+test",
+        "consumer[- ]driven\\s+contract",
+        "(openapi|json\\s+schema|graphql).*test"
+      ],
+      "keywords": [
+        "api contract testing",
+        "consumer-driven contract",
+        "provider compliance",
+        "openapi contract test"
+      ],
+      "name": "mle-api-contract-testing",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-auton": {
+      "allowed-tools": ["Bash", "Read"],
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(run|launch|start)\\s+(the\\s+)?(auton|defect)\\s+(reflex|loop|run)",
+        "(auton|reflex)\\s+(status|progress|summary|state)"
+      ],
+      "keywords": [
+        "auton",
+        "autonomic loop",
+        "reflex",
+        "convergence run",
+        "mle auton",
+        "defect reflex"
+      ],
+      "name": "mle-auton",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-capture": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "capture\\s+(this|the\\s+(decision|moment|milestone))",
+        "record\\s+(this\\s+)?(decision|milestone|moment)"
+      ],
+      "keywords": [
+        "capture this",
+        "record decision",
+        "capture moment",
+        "mle capture",
+        "milestone"
+      ],
+      "name": "mle-capture",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-cleanup": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(clean up|prune|housekeep)\\s+(all|everything|clones|branches)"
+      ],
+      "keywords": [
+        "cleanup",
+        "clean up everything",
+        "prune",
+        "housekeeping",
+        "mle cleanup"
+      ],
+      "name": "mle-cleanup",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-complete": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(complete|finish|cleanup|close)\\s+(the\\s+)?(task|clone|branch)"
+      ],
+      "keywords": [
+        "complete task",
+        "cleanup clone",
+        "task done",
+        "pr merged",
+        "mle complete"
+      ],
+      "name": "mle-complete",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-config-audit": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(audit|review|check)\\s+(config|configuration)\\s*(consistency|drift)?",
+        "(config|configuration)\\s+(drift|mismatch|inconsistenc)"
+      ],
+      "keywords": [
+        "config audit",
+        "audit config",
+        "configuration drift",
+        "config consistency",
+        "check config",
+        "config documentation",
+        "mle config-audit",
+        "config mismatch"
+      ],
+      "name": "mle-config-audit",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-cost": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(token|cost|spending|budget)\\s+(usage|attribution|summary|report)",
+        "how\\s+much\\s+(did|do|does)\\s+(this|it|the).*cost"
+      ],
+      "keywords": [
+        "token usage",
+        "cost attribution",
+        "spending",
+        "budget",
+        "mle cost",
+        "token cost"
+      ],
+      "name": "mle-cost",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-coverage": {
+      "archetype": "cli-wrapper-thin",
+      "intent_patterns": [
+        "(check|analyse|measure)\\s+design\\s+coverage",
+        "(are|which)\\s+requirements\\s+covered"
+      ],
+      "keywords": [
+        "design coverage",
+        "are requirements covered",
+        "design readiness",
+        "coverage analysis",
+        "requirement coverage",
+        "mle coverage"
+      ],
+      "name": "mle-coverage",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-create": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(create|start|begin|setup)\\s+(a\\s+)?(new\\s+)?(task|clone|branch)"
+      ],
+      "keywords": [
+        "new task",
+        "task clone",
+        "create clone",
+        "start task",
+        "new feature",
+        "new bugfix",
+        "new branch",
+        "mle create"
+      ],
+      "name": "mle-create",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-design": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(create|generate|write)\\s+(an?\\s+)?(ADR|design|diagram|API spec)",
+        "(review|check|analyse)\\s+(the\\s+)?design",
+        "(threat|security)\\s+model"
+      ],
+      "keywords": [
+        "create ADR",
+        "design API",
+        "generate diagram",
+        "review design",
+        "threat model",
+        "architecture decision",
+        "design review",
+        "mle design"
+      ],
+      "name": "mle-design",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-docs": {
+      "archetype": "reference",
+      "intent_patterns": [
+        "(where|how)\\s+(is|does|can I find)\\s+",
+        "(show|find|get)\\s+(me\\s+)?(the\\s+)?(docs|documentation|wiki|guide)",
+        "(learn|read)\\s+about\\s+"
+      ],
+      "keywords": [
+        "documentation",
+        "docs",
+        "wiki",
+        "where is",
+        "how does",
+        "reference",
+        "learn about",
+        "find the guide",
+        "mle docs"
+      ],
+      "name": "mle-docs",
+      "priority": "medium",
+      "type": "rigid"
+    },
+    "mle-doctor": {
+      "allowed-tools": ["Bash", "Read"],
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(check|diagnose|scan)\\s+(the\\s+)?(clone|health|status)"
+      ],
+      "keywords": [
+        "doctor",
+        "health check",
+        "clone status",
+        "task status",
+        "mle doctor"
+      ],
+      "name": "mle-doctor",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-error-audit": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(audit|review|check|scan)\\s+(error|exception)\\s+(handling|patterns)",
+        "(find|detect)\\s+(bare|swallowed|missing)\\s+(except|error|exception)"
+      ],
+      "keywords": [
+        "error audit",
+        "audit errors",
+        "check error handling",
+        "bare excepts",
+        "exception handling",
+        "error patterns",
+        "swallowed errors",
+        "mle error-audit"
+      ],
+      "name": "mle-error-audit",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-estimate": {
+      "archetype": "cli-wrapper-thin",
+      "intent_patterns": [
+        "(estimate|size|score)\\s+(the\\s+)?(stories|backlog|requirements)",
+        "(story\\s+)?point\\s+estimate"
+      ],
+      "keywords": [
+        "estimate stories",
+        "story points",
+        "effort estimate",
+        "complexity analysis",
+        "sizing",
+        "mle estimate"
+      ],
+      "name": "mle-estimate",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-evolve": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(evolve|upgrade|advance)\\s+(the\\s+)?(project\\s+)?maturity",
+        "(level\\s+up|move\\s+to)\\s+L[1-5]"
+      ],
+      "keywords": [
+        "maturity",
+        "evolve",
+        "level up",
+        "upgrade maturity",
+        "mle evolve"
+      ],
+      "name": "mle-evolve",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-feedback": {
+      "archetype": "cli-wrapper-thin",
+      "intent_patterns": [
+        "(analyse|classify)\\s+(root\\s+)?cause",
+        "(generate|create)\\s+remediation\\s+tasks",
+        "why\\s+(did|does)\\s+(this|it)\\s+(fail|break)"
+      ],
+      "keywords": [
+        "analyse feedback",
+        "root cause",
+        "why did this fail",
+        "remediation tasks",
+        "feedback loop",
+        "upstream fix",
+        "mle feedback"
+      ],
+      "name": "mle-feedback",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-feedback-methodology": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "feedback\\s+methodology",
+        "(classify|route)\\s+(root\\s+cause|feedback)",
+        "upstream\\s+(phase|remediation)"
+      ],
+      "keywords": [
+        "feedback methodology",
+        "root cause classification",
+        "upstream remediation",
+        "closed-loop feedback"
+      ],
+      "name": "mle-feedback-methodology",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-forge-orchestration": {
+      "archetype": "orchestrator",
+      "intent_patterns": [
+        "forge\\s+orchestration",
+        "(verify|check)\\s+merge\\s+SHA",
+        "per-Story\\s+branch",
+        "rebase\\s+recipe",
+        "tmux\\s+pane"
+      ],
+      "keywords": [
+        "forge orchestration",
+        "merge SHA verification",
+        "per-Story branch",
+        "tmux pane budget",
+        "rebase recipe",
+        "auto-complete races",
+        "rogue task-update",
+        "manual Story closure",
+        "migration filename",
+        "workspace fallback"
+      ],
+      "name": "mle-forge-orchestration",
+      "priority": "medium",
+      "type": "rigid"
+    },
+    "mle-goal-structure": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(plan|structure|design)\\s+(this|the|my)\\s+(implementation|change|fix|refactor)",
+        "(before|prior\\s+to)\\s+(coding|implementing|starting)",
+        "(what'?s|what\\s+is)\\s+(the|my)\\s+plan",
+        "(structure|verify)\\s+(my\\s+)?(goal|plan)"
+      ],
+      "keywords": [
+        "plan before coding",
+        "structured plan",
+        "verifiable goals",
+        "per-step verification",
+        "before I implement",
+        "before I start",
+        "what's the plan",
+        "goal structure",
+        "mle goal-structure"
+      ],
+      "name": "mle-goal-structure",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-harden-async": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(harden|audit|review|check)\\s+(async|asyncio|concurrent)\\s+(code|safety)?",
+        "(find|detect)\\s+(async|task)\\s+(leak|bug|issue)"
+      ],
+      "keywords": [
+        "harden async",
+        "async audit",
+        "check async",
+        "async safety",
+        "task leak",
+        "fire and forget",
+        "async hardening",
+        "mle harden-async"
+      ],
+      "name": "mle-harden-async",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-impact": {
+      "archetype": "cli-wrapper-thin",
+      "intent_patterns": [
+        "(analyse|assess|check)\\s+(the\\s+)?(impact|risk)",
+        "(build|generate|update)\\s+(a\\s+)?risk\\s+register",
+        "what('s|\\s+is)\\s+affected"
+      ],
+      "keywords": [
+        "impact analysis",
+        "risk register",
+        "what's affected",
+        "change impact",
+        "assess risk",
+        "risk summary",
+        "mle impact",
+        "mle risk"
+      ],
+      "name": "mle-impact",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-incremental-implementation": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(decompose|break down)\\s+(this\\s+)?(story|feature)",
+        "incremental(ly)?\\s+(implement|build)",
+        "implement.*in\\s+(small|incremental)\\s+steps"
+      ],
+      "keywords": [
+        "incremental implementation",
+        "decompose story",
+        "step by step build",
+        "dependency-ordered work"
+      ],
+      "name": "mle-incremental-implementation",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-peer-code-review": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(peer|code)\\s+review",
+        "review\\s+(this\\s+)?(pr|pull\\s+request|change)",
+        "review.*(someone|another|other)\\s+(agent|engineer)"
+      ],
+      "keywords": [
+        "peer review",
+        "code review",
+        "review this PR",
+        "review another agent's work"
+      ],
+      "name": "mle-peer-code-review",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-post-incident-review": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "post[- ]?incident\\s+(review|analysis|retro)",
+        "post[- ]?mortem",
+        "root\\s+cause.*(incident|outage|failure)"
+      ],
+      "keywords": [
+        "post-incident review",
+        "postmortem",
+        "root cause analysis",
+        "incident retrospective"
+      ],
+      "name": "mle-post-incident-review",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-pr": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(create|raise|open|make)\\s+(a\\s+)?(pull request|pr)"
+      ],
+      "keywords": [
+        "create pr",
+        "pull request",
+        "raise pr",
+        "open pr",
+        "mle pr"
+      ],
+      "name": "mle-pr",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-pre-commit-review": {
+      "allowed-tools": ["Read", "Bash", "Grep", "Glob"],
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(review|check|scan|validate)\\s+(my\\s+)?(changes|code|diff|commit)",
+        "(pre.?commit|quality)\\s+(review|check|gate|scan)",
+        "(ready|about)\\s+to\\s+commit"
+      ],
+      "keywords": [
+        "pre-commit",
+        "precommit",
+        "review changes",
+        "check before commit",
+        "quality gate",
+        "pre commit review",
+        "review my changes",
+        "ready to commit"
+      ],
+      "name": "mle-pre-commit-review",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-recall": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(recall|remember|surface)\\s+(prior|past|earlier)\\s+(decision|context|adr)",
+        "what\\s+did\\s+we\\s+(decide|say|agree)"
+      ],
+      "keywords": [
+        "recall",
+        "remember",
+        "prior decisions",
+        "context",
+        "mle recall",
+        "what did we decide",
+        "prior ADR"
+      ],
+      "name": "mle-recall",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-refactor-module": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(split|decompose|refactor|break up)\\s+(this\\s+)?(module|file)",
+        "(module|file)\\s+(is\\s+)?(too\\s+)?(big|large|long)"
+      ],
+      "keywords": [
+        "refactor module",
+        "split module",
+        "decompose",
+        "module too big",
+        "file too large",
+        "break up module",
+        "module size",
+        "mle refactor-module"
+      ],
+      "name": "mle-refactor-module",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-req": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(generate|create|analyse)\\s+(stories|requirements|NFRs|user stories)",
+        "(INVEST|invest)\\s+(score|validate|check)",
+        "(extract|identify)\\s+domain\\s+entities"
+      ],
+      "keywords": [
+        "generate stories",
+        "analyse requirements",
+        "generate NFRs",
+        "requirements from PRD",
+        "INVEST score",
+        "validate stories",
+        "domain entities",
+        "mle req"
+      ],
+      "name": "mle-req",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-resume": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(resume|restore|recreate)\\s+(a\\s+)?(task|clone|branch)"
+      ],
+      "keywords": [
+        "resume task",
+        "resume clone",
+        "resume branch",
+        "fresh vm",
+        "mle resume"
+      ],
+      "name": "mle-resume",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-security-scan": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(run|perform|execute)\\s+(a\\s+)?security\\s+scan",
+        "(check|scan)\\s+for\\s+(vulnerabilities|secrets|CVEs)",
+        "generate\\s+(an?\\s+)?SBOM"
+      ],
+      "keywords": [
+        "security scan",
+        "vulnerability check",
+        "SBOM",
+        "generate SBOM",
+        "check for vulnerabilities",
+        "secret detection",
+        "mle security"
+      ],
+      "name": "mle-security-scan",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-seed-evolve": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(plant|discover|evolve|update)\\s+(a\\s+)?seed",
+        "living\\s+seed"
+      ],
+      "keywords": [
+        "seed",
+        "living seed",
+        "seed evolve",
+        "plant seed",
+        "discover seeds",
+        "mle seed"
+      ],
+      "name": "mle-seed-evolve",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-shell": {
+      "archetype": "cli-wrapper-thin",
+      "intent_patterns": [
+        "(enter|open|start)\\s+(an?\\s+)?(isolated\\s+)?(shell|environment)"
+      ],
+      "keywords": [
+        "mle shell",
+        "isolated shell",
+        "clone shell",
+        "enter clone",
+        "activate venv"
+      ],
+      "name": "mle-shell",
+      "priority": "medium",
+      "type": "rigid"
+    },
+    "mle-skill-create": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(create|scaffold|author|new)\\s+(a\\s+)?(mle\\s+)?skill",
+        "mle\\s+skill\\s+create",
+        "(how\\s+do\\s+I|how\\s+to)\\s+(write|author|create)\\s+(a\\s+)?(skill|SKILL\\.md)"
+      ],
+      "keywords": [
+        "create a new skill",
+        "author a new skill",
+        "scaffold skill",
+        "new SKILL.md",
+        "mle skill create"
+      ],
+      "name": "mle-skill-create",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-spec-driven-development": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "spec[- ]driven\\s+(development|implementation)",
+        "(read|derive).*(invariants|test cases).*(spec|quint|tla)",
+        "(implement|build).*from\\s+(spec|specification)"
+      ],
+      "keywords": [
+        "spec-driven development",
+        "formal spec to tests",
+        "invariant extraction",
+        "read the spec first"
+      ],
+      "name": "mle-spec-driven-development",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-sustained-interrogation": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(interrogate|challenge|sustain|stress.test)\\s+(my\\s+|the\\s+|this\\s+)?plan",
+        "(surface|state|name)\\s+(my\\s+|the\\s+)?assumptions",
+        "(am\\s+I|are\\s+we)\\s+(rushing|jumping|leaping)\\s+to\\s+(implementation|execution|coding)",
+        "(what\\s+could\\s+go\\s+wrong|what\\s+am\\s+I\\s+missing)\\s+(with|in)\\s+(this|my)\\s+plan",
+        "/mle-sustained-interrogation",
+        "/mle-interrogate"
+      ],
+      "keywords": [
+        "sustained interrogation",
+        "epistemic discipline",
+        "surface assumptions",
+        "challenge plan",
+        "interrogate plan",
+        "convergence criteria",
+        "alternative interpretations",
+        "falsifier",
+        "no recursion cap",
+        "plan-before-execution",
+        "mle sustained-interrogation",
+        "mle interrogate plan"
+      ],
+      "name": "mle-sustained-interrogation",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-sync": {
+      "allowed-tools": ["Bash"],
+      "archetype": "cli-wrapper-thin",
+      "intent_patterns": [
+        "(sync|save|push|backup)\\s+(my\\s+)?(work|changes|task|clone)"
+      ],
+      "keywords": ["sync", "save work", "push", "commit and push", "mle sync"],
+      "name": "mle-sync",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-test-gen": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(generate|create|add|write)\\s+(unit\\s+|integration\\s+|BDD\\s+)?tests",
+        "(increase|improve|add)\\s+(test\\s+)?coverage"
+      ],
+      "keywords": [
+        "generate tests",
+        "create tests",
+        "add test coverage",
+        "test generation",
+        "unit tests",
+        "integration tests",
+        "BDD tests",
+        "mle test"
+      ],
+      "name": "mle-test-gen",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-trace": {
+      "archetype": "cli-wrapper-thin",
+      "intent_patterns": [
+        "(generate|create|build)\\s+(a\\s+)?traceability\\s+matrix",
+        "(trace|link|map)\\s+requirements"
+      ],
+      "keywords": [
+        "traceability matrix",
+        "trace requirements",
+        "requirement coverage",
+        "traceability",
+        "link requirements",
+        "mle trace"
+      ],
+      "name": "mle-trace",
+      "priority": "medium",
+      "type": "flexible"
+    },
+    "mle-trace-methodology": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "trace(ability)?\\s+methodology",
+        "coverage\\s+gap.*(trace|requirement)",
+        "(discover|classify)\\s+(trace|requirement|coverage)"
+      ],
+      "keywords": [
+        "traceability methodology",
+        "coverage gap analysis",
+        "requirement discovery",
+        "trace classification"
+      ],
+      "name": "mle-trace-methodology",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-troubleshoot": {
+      "allowed-tools": ["Bash", "Read", "Grep"],
+      "archetype": "reference",
+      "intent_patterns": [
+        "(fix|debug|troubleshoot|diagnose)\\s+(this|the|my)\\s+",
+        "(not|isn't|doesn't)\\s+(working|running|starting)",
+        "(error|failure|exception)\\s+(in|with|from)"
+      ],
+      "keywords": [
+        "error",
+        "failed",
+        "not working",
+        "broken",
+        "troubleshoot",
+        "fix",
+        "debug",
+        "mle troubleshoot"
+      ],
+      "name": "mle-troubleshoot",
+      "priority": "high",
+      "type": "rigid"
+    },
+    "mle-wi-author": {
+      "archetype": "methodology-pure",
+      "intent_patterns": [
+        "(author|draft|write|generate)\\s+(a\\s+)?(work\\s+item|story|epic|feature|bug|task)\\s+(body)?",
+        "mle\\s+wi\\s+author"
+      ],
+      "keywords": [
+        "author work item",
+        "wi body",
+        "write story",
+        "draft work item",
+        "mle wi author",
+        "story body",
+        "bug body"
+      ],
+      "name": "mle-wi-author",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-wi-create": {
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(create|file|submit|open)\\s+(a\\s+)?(work\\s+item|story|epic|feature|bug|task)",
+        "mle\\s+wi\\s+create"
+      ],
+      "keywords": [
+        "create work item",
+        "file work item",
+        "submit work item",
+        "mle wi create",
+        "file a bug",
+        "open a story"
+      ],
+      "name": "mle-wi-create",
+      "priority": "high",
+      "type": "flexible"
+    },
+    "mle-work": {
+      "allowed-tools": ["Bash", "Read"],
+      "archetype": "methodology-cli-orchestrating",
+      "intent_patterns": [
+        "(work on|start|pick up|take)\\s+(story|task|item|work item|#?\\d+)"
+      ],
+      "keywords": [
+        "work on",
+        "start work",
+        "work item",
+        "story",
+        "pick up",
+        "mle work",
+        "take task",
+        "begin work"
+      ],
+      "name": "mle-work",
+      "priority": "high",
+      "type": "flexible"
+    }
+  }
+}

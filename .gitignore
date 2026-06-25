@@ -6,3 +6,6 @@ out
 coverage
 *.log*
 node_modules
+
+# MLE metadata (per-workspace, not committed)
+.mle-metadata.json
