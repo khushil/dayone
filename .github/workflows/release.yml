@@ -1,29 +1,25 @@
 name: Release
 
-# Push a version tag to build installers and publish a GitHub Release:
+# Push a version tag to build installers and publish a single GitHub Release:
 #   git tag v1.0.0 && git push origin v1.0.0
 on:
   push:
     tags: ['v*']
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  release:
+  # Each OS builds its installer and uploads it as an artifact — no publishing
+  # here, so the two jobs can't race to create separate releases.
+  build:
     name: Build installers (${{ matrix.os }})
     strategy:
       fail-fast: false
-      # Serialize so the second job appends to the release the first created,
-      # instead of both racing to create separate draft releases for the tag.
-      max-parallel: 1
       matrix:
         include:
           - os: macos-latest
-            target: '--mac' # produces the .dmg
+            target: '--mac' # .dmg
           - os: windows-latest
-            target: '--win' # produces the .exe (NSIS installer)
+            target: '--win' # .exe (NSIS)
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -33,9 +29,31 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # Builds the platform installer and uploads it to the GitHub Release for
-      # the tag. GITHUB_TOKEN is provided automatically by Actions.
-      - name: Package & publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder ${{ matrix.target }} --publish always
+      - run: npx electron-builder ${{ matrix.target }} --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.zip
+            dist/*.blockmap
+            dist/latest*.yml
+          if-no-files-found: ignore
+
+  # A single job collects every artifact and publishes ONE release for the tag.
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**
+          fail_on_unmatched_files: true
