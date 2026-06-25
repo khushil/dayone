@@ -1,0 +1,48 @@
+name: Commitlint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title:
+    name: Conventional PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      # The PR title is what release-please reads under squash-merge — it is the
+      # authoritative gate; per-commit linting is left to the local lefthook hook.
+      - name: Lint PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$PR_TITLE" | npx --no-install commitlint
+
+  version-guard:
+    name: Guard manual version bumps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Best-effort (branch-protection-backed, not a security control): only the
+      # release-please PR may change package.json "version".
+      - name: Reject out-of-band version changes
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if git diff --unified=0 "origin/${{ github.base_ref }}"...HEAD -- package.json \
+               | grep -qE '^[+-]\s*"version":'; then
+            case "$HEAD_REF" in
+              release-please--*) echo "release-please version bump — allowed" ;;
+              *) echo "::error::package.json version may only be changed by the release-please PR"; exit 1 ;;
+            esac
+          else
+            echo "no version change"
+          fi
