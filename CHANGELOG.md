@@ -2,6 +2,13 @@
 
 This file is maintained automatically by [release-please](https://github.com/googleapis/release-please) from Conventional Commits. Do not edit by hand.
 
+## [2.0.1](https://github.com/khushil/dayone/compare/v2.0.0...v2.0.1) (2026-06-25)
+
+
+### Bug Fixes
+
+* **release:** use plain vX.Y.Z tags and a robust version guard ([#10](https://github.com/khushil/dayone/issues/10)) ([c44819a](https://github.com/khushil/dayone/commit/c44819ac49c6ea77e96fe8e7bd2c7b375faeb779))
+
 ## [2.0.0](https://github.com/khushil/dayone/compare/dayone-v1.0.3...dayone-v2.0.0) (2026-06-25)
 
 
