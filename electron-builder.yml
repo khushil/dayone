@@ -1,0 +1,46 @@
+appId: com.sectorscope.app
+productName: SectorScope
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.json}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!{vitest.config.ts,vitest.setup.ts,cucumber.mjs,.stylelintrc.json,components.json}'
+  - '!{tests,features,scripts,docs}/**'
+  - '!data/**'
+# The committed snapshot ships as a read-only resource; the app refreshes into
+# userData, never the bundle.
+extraResources:
+  - from: data
+    to: data
+asarUnpack:
+  - resources/**
+win:
+  executableName: sectorscope
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  category: public.app-category.finance
+  entitlementsInherit: build/entitlements.mac.plist
+  notarize: false
+dmg:
+  artifactName: ${name}-${version}.${ext}
+linux:
+  target:
+    - AppImage
+  maintainer: khushil.dep@gmail.com
+  category: Office
+appImage:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false
+publish:
+  provider: github
+  owner: khushil
+  repo: dayone
