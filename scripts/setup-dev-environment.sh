@@ -71,14 +71,8 @@ echo -e "${BOLD}Summary:${NC} $PASS passed, $FAIL failed"
 echo ""
 
 if [[ "$CHECK_ONLY" == "false" ]]; then
-    echo -e "${BOLD}Setting up git hooks...${NC}"
-    [[ -f "$SCRIPT_DIR/setup-git-hooks.sh" ]] && bash "$SCRIPT_DIR/setup-git-hooks.sh"
-
-    if [[ -f "$SCRIPT_DIR/setup-claude-hooks.sh" ]]; then
-        echo ""
-        echo -e "${BOLD}Setting up Claude Code workspace-guard hook...${NC}"
-        bash "$SCRIPT_DIR/setup-claude-hooks.sh" "$REPO_ROOT"
-    fi
+    echo -e "${BOLD}Installing git hooks via lefthook...${NC}"
+    (cd "$REPO_ROOT" && npx --no-install lefthook install)
 fi
 
 if [[ $FAIL -gt 0 ]]; then
