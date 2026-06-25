@@ -56,7 +56,8 @@ jobs:
           TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
           v="$(node -p "require('./package.json').version")"
-          [ "v$v" = "$TAG" ] || { echo "::error::package.json $v != tag $TAG"; exit 1; }
+          # Robust to any component prefix: compare the version after the last 'v'.
+          [ "${TAG##*v}" = "$v" ] || { echo "::error::package.json $v != tag $TAG"; exit 1; }
       - run: npm run build
       - run: npx electron-builder ${{ matrix.target }} --publish never
       - name: Upload installers to the draft release
