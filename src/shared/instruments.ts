@@ -93,3 +93,15 @@ export interface ProviderInfo {
   credentialFields: Array<keyof CredentialRecord>;
   capabilities: Capabilities;
 }
+
+/** Per-provider key state surfaced to the renderer (never the key itself). */
+export interface KeysStatus {
+  secure: boolean;
+  hasKey: Record<string, boolean>;
+}
+
+/** Result of a key validation (reason is sanitized of any secret). */
+export interface KeyCheck {
+  valid: boolean;
+  detail?: string;
+}

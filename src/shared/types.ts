@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import type {
+  CredentialRecord,
+  KeyCheck,
+  KeysStatus,
+  ProviderInfo,
+} from './instruments';
 
 /**
  * Shared contracts for DayONE, imported by the main, preload, and renderer
@@ -58,7 +64,18 @@ export interface DayoneApi {
   /** Best-effort refresh from the network; keeps last-good data on failure. */
   refreshData(): Promise<RefreshResult>;
   /** Registered data providers (metadata only — never credentials). */
-  listProviders(): Promise<Array<import('./instruments').ProviderInfo>>;
+  listProviders(): Promise<ProviderInfo[]>;
+  /** Per-provider key presence + whether persistence is securely encrypted. */
+  keysStatus(): Promise<KeysStatus>;
+  /** Store a provider's credentials (renderer→main only; nothing is returned). */
+  setKey(
+    providerId: string,
+    record: CredentialRecord,
+  ): Promise<{ persisted: boolean }>;
+  /** Remove a provider's stored credentials. */
+  clearKey(providerId: string): Promise<void>;
+  /** Check the stored key against the provider (reason is sanitized). */
+  validateKey(providerId: string): Promise<KeyCheck>;
 }
 
 /** Raised when input data is missing or fails schema validation (FR-1). */

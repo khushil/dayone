@@ -10,6 +10,12 @@ const api: DayoneApi = {
   loadData: () => ipcRenderer.invoke('dayone:load-data'),
   refreshData: () => ipcRenderer.invoke('dayone:refresh-data'),
   listProviders: () => ipcRenderer.invoke('dayone:providers-list'),
+  keysStatus: () => ipcRenderer.invoke('dayone:keys-status'),
+  setKey: (providerId, record) =>
+    ipcRenderer.invoke('dayone:keys-set', providerId, record),
+  clearKey: (providerId) => ipcRenderer.invoke('dayone:keys-clear', providerId),
+  validateKey: (providerId) =>
+    ipcRenderer.invoke('dayone:keys-validate', providerId),
 };
 
 contextBridge.exposeInMainWorld('api', api);
