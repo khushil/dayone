@@ -15,6 +15,9 @@ jobs:
     name: Build installers (${{ matrix.os }})
     strategy:
       fail-fast: false
+      # Serialize so the second job appends to the release the first created,
+      # instead of both racing to create separate draft releases for the tag.
+      max-parallel: 1
       matrix:
         include:
           - os: macos-latest
