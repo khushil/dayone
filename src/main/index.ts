@@ -53,7 +53,7 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#0d1117',
-    title: 'SectorScope',
+    title: 'DayONE',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -74,12 +74,17 @@ function createWindow(): void {
     }
   });
 
-  // Debug aids: open a detached DevTools window so the renderer console is
-  // visible, surface any load failure, and let F12 toggle DevTools in
-  // production. Disable by launching with SECTORSCOPE_DEBUG=0.
-  const openDevTools = (): void =>
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
-  if (process.env['SECTORSCOPE_DEBUG'] !== '0') {
+  // Debug aids — DevTools are OFF in packaged builds by default (opt-IN), so a
+  // packaged app never exposes live keys/quotes via the console. Enable with
+  // DAYONE_DEBUG=1. EVERY open path is gated, including the crash/load-failure
+  // handlers that fire in production.
+  const debugEnabled = !app.isPackaged || process.env['DAYONE_DEBUG'] === '1';
+  const openDevTools = (): void => {
+    if (debugEnabled) {
+      mainWindow.webContents.openDevTools({ mode: 'detach' });
+    }
+  };
+  if (debugEnabled) {
     mainWindow.webContents.once('did-finish-load', openDevTools);
   }
   mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) => {
@@ -91,7 +96,7 @@ function createWindow(): void {
     openDevTools();
   });
   mainWindow.webContents.on('before-input-event', (_e, input) => {
-    if (input.type === 'keyDown' && input.key === 'F12') {
+    if (debugEnabled && input.type === 'keyDown' && input.key === 'F12') {
       mainWindow.webContents.toggleDevTools();
     }
   });
@@ -104,7 +109,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.sectorscope.app');
+  electronApp.setAppUserModelId('com.dayone.app');
 
   // Deny all permission requests — the app needs none.
   session.defaultSession.setPermissionRequestHandler((_wc, _perm, callback) =>
@@ -117,8 +122,8 @@ app.whenReady().then(() => {
   });
 
   // IPC: load the committed/last-good snapshot; refresh best-effort from network.
-  ipcMain.handle('sectorscope:load-data', () => readDataFromDisk());
-  ipcMain.handle('sectorscope:refresh-data', () => refreshData());
+  ipcMain.handle('dayone:load-data', () => readDataFromDisk());
+  ipcMain.handle('dayone:refresh-data', () => refreshData());
 
   createWindow();
 

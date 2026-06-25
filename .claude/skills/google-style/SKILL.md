@@ -5,7 +5,7 @@ description: Check (or fix) the codebase against the Google TypeScript Style Gui
 
 # Google style sweep
 
-Enforce the Google TypeScript Style Guide across SectorScope. The rules are encoded in `eslint.config.mjs` (ESLint 9 flat config) with formatting owned by Prettier; CSS is checked by Stylelint. See `docs/CODING_STANDARDS.md` for what is mechanically enforced vs guide convention, and the two documented deviations.
+Enforce the Google TypeScript Style Guide across DayONE. The rules are encoded in `eslint.config.mjs` (ESLint 9 flat config) with formatting owned by Prettier; CSS is checked by Stylelint. See `docs/CODING_STANDARDS.md` for what is mechanically enforced vs guide convention, and the two documented deviations.
 
 ## Steps
 

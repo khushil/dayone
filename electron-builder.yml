@@ -1,5 +1,5 @@
-appId: com.sectorscope.app
-productName: SectorScope
+appId: com.dayone.app
+productName: DayONE
 directories:
   buildResources: build
 files:
@@ -20,7 +20,7 @@ extraResources:
 asarUnpack:
   - resources/**
 win:
-  executableName: sectorscope
+  executableName: dayone
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

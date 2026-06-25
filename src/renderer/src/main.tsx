@@ -13,7 +13,7 @@ const container = document.getElementById('root');
 /** Last-resort visible message if the app never mounts (e.g. a load failure). */
 function showFatal(message: string): void {
   if (container && container.childElementCount === 0) {
-    container.textContent = `SectorScope failed to start: ${message}. Press F12 for details.`;
+    container.textContent = `DayONE failed to start: ${message}. Press F12 for details.`;
   }
 }
 
@@ -23,8 +23,7 @@ window.addEventListener('unhandledrejection', (e) =>
 );
 
 if (!container) {
-  document.body.textContent =
-    'SectorScope: root container #root was not found.';
+  document.body.textContent = 'DayONE: root container #root was not found.';
 } else {
   try {
     createRoot(container).render(

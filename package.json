@@ -1,5 +1,5 @@
 {
-  "name": "sectorscope",
+  "name": "dayone",
   "version": "1.0.3",
   "description": "Track 12-month stock performance by market sector — a cross-platform desktop utility.",
   "main": "./out/main/index.js",

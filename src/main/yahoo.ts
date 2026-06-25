@@ -101,7 +101,7 @@ async function fetchChart(
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const res = await fetchImpl(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (SectorScope)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (DayONE)' },
       signal: controller.signal,
     });
     if (!res.ok) {

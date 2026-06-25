@@ -4,25 +4,25 @@ import {
   bestWorstSector,
   marketBreadth,
 } from '../../src/renderer/src/lib/summary';
-import type { SectorScopeWorld } from '../support/world';
+import type { DayoneWorld } from '../support/world';
 
 Then(
   'the best-performing sector is {string}',
-  function (this: SectorScopeWorld, name: string) {
+  function (this: DayoneWorld, name: string) {
     assert.equal(bestWorstSector(this.dataset(), this.range).best.name, name);
   },
 );
 
 Then(
   'the worst-performing sector is {string}',
-  function (this: SectorScopeWorld, name: string) {
+  function (this: DayoneWorld, name: string) {
     assert.equal(bestWorstSector(this.dataset(), this.range).worst.name, name);
   },
 );
 
 Then(
   'market breadth shows {string}',
-  function (this: SectorScopeWorld, text: string) {
+  function (this: DayoneWorld, text: string) {
     const { advancing, total } = marketBreadth(this.dataset(), this.range);
     assert.equal(`${advancing} / ${total} advancing`, text);
   },

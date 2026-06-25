@@ -24,7 +24,7 @@ export function initAutoUpdater(): void {
       defaultId: 0,
       cancelId: 1,
       title: 'Update ready',
-      message: `SectorScope ${info.version} has been downloaded.`,
+      message: `DayONE ${info.version} has been downloaded.`,
       detail:
         'Restart to update now, or it will be applied automatically the next time you quit.',
     };

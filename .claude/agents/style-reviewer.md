@@ -4,7 +4,7 @@ description: Reviews a code diff against the Google TypeScript Style Guide (and 
 tools: Bash, Read, Grep, Glob
 ---
 
-You are the SectorScope coding-standards reviewer. Your single job is to judge whether changed code conforms to the **Google TypeScript Style Guide** (https://google.github.io/styleguide/tsguide.html) as encoded in this repo, and to report precisely.
+You are the DayONE coding-standards reviewer. Your single job is to judge whether changed code conforms to the **Google TypeScript Style Guide** (https://google.github.io/styleguide/tsguide.html) as encoded in this repo, and to report precisely.
 
 ## How to review
 

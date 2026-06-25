@@ -1,4 +1,4 @@
-# SectorScope
+# DayONE
 
 A small, polished **cross-platform desktop app** (Windows 11 + macOS) that visualizes **12-month stock performance by market sector** — the 11 GICS sectors via their SPDR sector ETFs. Built with Electron + React 19 + TypeScript.
 
@@ -41,13 +41,13 @@ npm run dev      # launches the app (needs a display)
 
 Prices come from the Yahoo Finance chart endpoint (no API key, adjusted close). The committed `data/sectors.json` is the **canonical, offline** path; `fetch-data` is best-effort and should be verified from Node on the demo machine beforehand — **don't fetch live during a presentation**.
 
-## Packaging & releases
+## Packaging & releases — automated (SemVer)
 
-Cross-OS installers must be built on their target OS (or CI): `build:mac` on macOS, `build:win` on Windows. CI (`.github/workflows/ci.yml`) runs lint + typecheck + tests + BDD + build on Linux, Windows, and macOS. Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds each installer and publishes **one** GitHub Release with the `.dmg` + `.exe`.
+**Versions are derived, never hand-picked.** Commits follow [Conventional Commits](https://www.conventionalcommits.org) (enforced by `commitlint` in CI + a local `lefthook` hook); **release-please** reads them, opens a release PR that bumps `package.json` + `CHANGELOG.md`, and on merge creates the tag + a **draft** GitHub Release. `.github/workflows/release-please.yml` then builds the installers (mac `.dmg`, win `.exe`) on their target OS, uploads them to the draft, and publishes it as **one** release. CI (`.github/workflows/ci.yml`) runs lint + typecheck + tests + BDD + build on Linux, Windows, and macOS. **Do not** run `npm version` or push `v*` tags by hand.
 
 ## Updates
 
-The app **auto-updates in place** via `electron-updater` — no uninstall/reinstall. On launch it checks the GitHub Releases of this repo, downloads a newer version in the background, and offers to restart (also applying it on the next quit). To ship an update, bump the version and push a new `v*` tag.
+The app **auto-updates in place** via `electron-updater` — no uninstall/reinstall. On launch it checks this repo's GitHub Releases, downloads a newer version in the background, and offers to restart (also applying it on the next quit). To ship an update, just merge Conventional-Commit changes — release-please does the rest.
 
 > Windows (NSIS) auto-update works for unsigned builds. macOS auto-update requires a **signed + notarized** app, so the unsigned demo build can't self-update on macOS — Mac users download the new `.dmg`.
 

@@ -35,7 +35,7 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error('SectorScope UI error:', error, info.componentStack);
+    console.error('DayONE UI error:', error, info.componentStack);
   }
 
   render(): ReactNode {
@@ -45,9 +45,7 @@ export class ErrorBoundary extends Component<
     }
     return (
       <div style={wrap}>
-        <h1 style={{ fontSize: '20px', margin: 0 }}>
-          SectorScope hit an error
-        </h1>
+        <h1 style={{ fontSize: '20px', margin: 0 }}>DayONE hit an error</h1>
         <pre
           style={{
             maxWidth: '640px',

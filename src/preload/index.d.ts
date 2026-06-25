@@ -1,7 +1,7 @@
-import type { SectorScopeApi } from '../shared/types';
+import type { DayoneApi } from '../shared/types';
 
 declare global {
   interface Window {
-    api: SectorScopeApi;
+    api: DayoneApi;
   }
 }
