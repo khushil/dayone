@@ -1,6 +1,6 @@
 {
   "name": "sectorscope",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Track 12-month stock performance by market sector — a cross-platform desktop utility.",
   "main": "./out/main/index.js",
   "author": "Khushil Dep",
@@ -28,7 +28,6 @@
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
-    "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@fontsource-variable/fraunces": "^5.2.9",
     "@fontsource-variable/geist": "^5.2.9",
