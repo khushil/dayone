@@ -1,35 +1,46 @@
 # Code Standards
 
-**Path scope**: `src/**/*.py`
+**Path scope**: `src/**/*.ts`, `src/**/*.tsx`
 
-## Language and Runtime
+DayONE follows the **Google TypeScript Style Guide**. The authoritative,
+enforcement-wired spec is [`docs/CODING_STANDARDS.md`](../../docs/CODING_STANDARDS.md)
+(plus its two documented deviations). This rule is the working digest — when in
+doubt, defer to that document and the nested `src/**/CLAUDE.md` files.
 
-- Python 3.12+ — use modern syntax: `match`, `X | Y` unions, f-strings
-- Ruff enforced: line-length 100, rules E/F/I/N/W/UP (per pyproject.toml)
-- Type hints on all public functions
-- British English in user-facing text
+## Language & runtime
 
-## Architecture Boundaries
+- TypeScript 5.9 (strict), React 19, Electron 39, Node 22 — use modern syntax.
+- Prefer `unknown` over `any`; never widen to `any` to silence the checker.
+- `const` by default, never `var`; strict equality `===`/`!==` (null check exempt).
 
-| Package               | Responsibility                                   | Allowed Imports                                         |
-| --------------------- | ------------------------------------------------ | ------------------------------------------------------- |
-| `src/mle/core/`       | Pure business logic                              | Standard library only — NO Click, Rich, or azure-devops |
-| `src/mle/ado/`        | Azure DevOps REST API integration                | azure-devops SDK, core/                                 |
-| `src/mle/cli.py`      | Click CLI entry point                            | Click, Rich, core/, ado/                                |
-| `src/mle/skill/`      | Structured JSON output for Claude Code `--skill` | core/                                                   |
-| `src/mle/statusline/` | MLE Hud statusline for Claude Code               | Standard library, core/                                 |
-| `src/mle/watcher/`    | Background watcher daemon and plugins            | core/, ado/                                             |
+## Enforced by ESLint (flat config) + Prettier — keep the build green
 
-**Core isolation is mandatory** — `core/` modules must remain framework-free so they can be tested without UI or network dependencies.
+- **Named exports only** in `src/**` (`import/no-default-export`); config/entry
+  files (e.g. `*.config.ts`) may `export default`.
+- `interface` for object shapes; `type` for unions and aliases.
+- Naming: `UpperCamelCase` types, `lowerCamelCase` values/functions,
+  `UPPER_SNAKE` module constants, `PascalCase` React components.
+- Prettier owns all formatting (single quotes, semicolons, 80 cols, trailing
+  commas, Tailwind class order). Never hand-format — the PostToolUse hook
+  auto-fixes on every edit.
 
-## DON'Ts
+## Convention (reviewed, not all auto-checked)
 
-- Don't hardcode ADO org/project — read from `~/.mle/config.toml` or git remote
-- Don't store PATs in plain text files (use keyring, fall back to env var)
-- Don't modify the user's CLAUDE.md in `mle init` (human-curated)
-- Don't suppress git errors silently — always report failures clearly
-- Don't import Click or Rich in `core/` modules
+- `/** TSDoc */` on every exported function, type, and module.
+- Small, single-purpose functions; no dead code; names describe intent.
 
-## See Also
+## Domain modelling & contracts
 
-- `goal-structure.md` — per-step verification discipline for non-trivial changes
+- Cross-process data is defined once as **Zod** schemas in `src/shared`; derive
+  TS types with `z.infer` — never hand-maintain a parallel `interface`.
+- IPC results travel as a discriminated union (`RefreshResult`:
+  `{ ok: true; data } | { ok: false; reason }`) so failures are data, not throws.
+- `lib/` is pure: same input → same output; no `Date.now()`/`window`/IO inside;
+  range-dependent functions take an explicit `asOf`/anchor argument.
+- Guard numerics: reject non-finite/≤0 divisors; never emit `NaN`/`Infinity`.
+
+## See also
+
+- `docs/CODING_STANDARDS.md` — canonical spec + deviations
+- `src/shared/CLAUDE.md`, `src/renderer/src/lib/CLAUDE.md` — module conventions
+- `testing-standards.md`, `architecture-standards.md`

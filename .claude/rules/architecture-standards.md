@@ -2,35 +2,32 @@
 
 **Path scope**: `src/**`
 
-## Module Dependency Direction
+## Process boundaries (dependencies flow inward; never the reverse)
 
-Dependencies flow inward. Outer layers depend on inner layers, never the reverse:
+| Layer                  | Responsibility                                | May import                                                              |
+| ---------------------- | --------------------------------------------- | ----------------------------------------------------------------------- |
+| `src/shared`           | Zod contracts shared by all processes         | Zod only — no Electron / DOM / React                                    |
+| `src/main`             | Electron main: window, security, IPC          | Node, `../shared`                                                       |
+| `src/preload`          | Typed `contextBridge` surface on `window.api` | Electron preload, `../shared`                                           |
+| `src/renderer/src`     | React 19 UI (Tailwind v4, Zustand)            | React, `@shared`, `@renderer`, `lib/`                                   |
+| `src/renderer/src/lib` | **Pure** domain logic (the testable core)     | `@shared/types` + TS stdlib only — no React / Electron / DOM / `window` |
 
-| Module        | May Import                            | Must NOT Import                |
-| ------------- | ------------------------------------- | ------------------------------ |
-| `core/`       | Standard library only                 | cli, ado, watcher, skill       |
-| `ado/`        | core/, standard library, azure-devops | cli, watcher                   |
-| `watcher/`    | core/, ado/                           | cli                            |
-| `skill/`      | core/                                 | cli, ado, watcher              |
-| `cli.py`      | core/, ado/, Click, Rich              | (entry point — may import all) |
-| `statusline/` | core/, standard library               | cli, ado                       |
+## Invariants
 
-## New Module Guidelines
+- **Security**: main hardens `BrowserWindow` (`contextIsolation: true`,
+  `nodeIntegration: false`, `sandbox: true`); CSP `connect-src 'none'` — the
+  renderer makes no network calls. Preload exposes a minimal `DayoneApi`, never
+  raw `ipcRenderer` or Node globals.
+- **No live network** anywhere in the app; `data/sectors.json` (committed) is the
+  canonical/offline path. Refresh writes only to `userData/sectors.json` (atomic
+  temp + rename); `data/sectors.json` is the read-only fallback.
+- Components call the `useSectorData()` hook, never `window.api` directly; one
+  Zustand store is the single source of truth; range-dependent values come from
+  `lib/` pure functions.
+- **Gain/loss is never colour-only** — always pair with a sign + ▲/▼; a
+  colourblind-safe mode swaps the diverging scale.
 
-- Module names: singular nouns for domain (`clone`, `config`, `metadata`)
-- CLI command names: verbs (`init`, `sync`, `complete`, `abandon`)
-- New modules must declare their allowed imports in this table before merge
-- No circular dependencies — if A imports B, B must not import A
+## See also
 
-## Configuration
-
-- All configurable values live in `~/.mle/config.toml` — never hardcode paths, URLs, or thresholds
-- Read config via `mle.core.config` module — never read TOML directly in other modules
-- Defaults must be sensible: a fresh `mle init` must work without any config file
-- Environment variables override config.toml for CI/CD contexts
-
-## Extension Points
-
-- New SDLC phases: add to `core/`, expose via `cli.py`
-- New ADO integrations: add to `ado/`, consume from `core/` via dependency injection
-- New watcher plugins: add to `watcher/plugins/`, register in watcher config
+- root `CLAUDE.md` (architecture map) and each `src/**/CLAUDE.md`
+- `code-standards.md`, `testing-standards.md`
