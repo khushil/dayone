@@ -1,55 +1,37 @@
 # Documentation Standards
 
-**Path scope**: `**/*.py`, `**/*.md`
+**Path scope**: `src/**/*.ts`, `src/**/*.tsx`, `**/*.md`
 
-## Docstrings
+## TSDoc
 
-- Google-style docstrings on all public functions, classes, and methods
-- Required sections: one-line summary, `Args:`, `Returns:`, `Raises:` (when applicable)
-- Omit `Args:` for zero-parameter functions; omit `Raises:` if nothing is raised
+- `/** ... */` TSDoc on every exported function, type/interface, React component,
+  and module.
+- Describe intent and contracts, not the obvious. Document non-trivial params and
+  return shapes; note thrown errors (e.g. `DataError`) and invariants. Don't restate
+  the name. No `TODO`/`FIXME` in committed docs — open a GitHub issue instead.
 
-Example:
-
-```python
-def create_clone(task_id: str, *, branch: str = "main") -> CloneResult:
-    """Create a task clone from the home repository.
-
-    Args:
-        task_id: ADO work item ID (e.g. "1234").
-        branch: Base branch to create feature branch from.
-
-    Returns:
-        CloneResult with clone path and branch name.
-
-    Raises:
-        CloneError: If the home repository is not found.
-    """
+```ts
+/**
+ * Rebase a price series so the first close is 100.
+ *
+ * @throws {DataError} if the base close is not a positive, finite number.
+ */
+export function rebaseToHundred(series: readonly number[]): number[] {
+  /* … */
+}
 ```
 
-## Module Docstrings
+## Components & modules
 
-- Every `.py` file must have a module-level docstring on line 1 (after `from __future__`)
-- Format: single sentence describing the module's responsibility
-- Example: `"""Azure DevOps REST API client for work item operations."""`
+- Each component file: a one-line TSDoc summary of what it renders and its key props.
+- Each `lib/` module: a module-level comment stating its single responsibility.
 
-## README
+## Markdown / docs
 
-| Section      | Required | Content                                         |
-| ------------ | -------- | ----------------------------------------------- |
-| Purpose      | Yes      | One paragraph explaining what this project does |
-| Setup        | Yes      | Steps to install and configure                  |
-| Usage        | Yes      | Key commands or API examples                    |
-| Contributing | Yes      | Branch model, PR process, test requirements     |
-| Architecture | Optional | Module diagram or description                   |
+- `docs/CODING_STANDARDS.md` is the canonical style spec; `docs/` and the nested
+  `src/**/CLAUDE.md` files are the architecture source of truth — keep them current
+  when an API or the structure changes. British English in prose.
 
-## DON'Ts
+## See also
 
-- Don't write docstrings that merely restate the function name
-- Don't leave `TODO` or `FIXME` in committed docstrings — use issue tracker
-- Don't use reStructuredText format — Google style only for consistency
-
-## See Also
-
-- `docs/CLAUDE.md` — documentation hub and navigation (if installed)
-- `.claude/rules/code-standards.md` — code-level standards
-- `.claude/rules/testing-standards.md` — test standards and coverage
+- `code-standards.md`, `docs/CODING_STANDARDS.md`

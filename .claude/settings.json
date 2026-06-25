@@ -1,5 +1,5 @@
 {
-  "$comment": "Project hooks for DayONE. The PostToolUse hook enforces the Google TypeScript Style Guide by auto-formatting and lint-fixing every file Claude edits, surfacing any residual violations. An optional pre-commit gate lives in package.json scripts (npm run lint) — kept out of the hook so a red lint never blocks a live edit.",
+  "$comment": "Project hooks for DayONE. PostToolUse enforces the Google TypeScript Style Guide by auto-formatting and lint-fixing every file Claude edits. UserPromptSubmit runs skill-activation. PreToolUse branch-guard blocks direct commits/pushes to master. An optional lint gate lives in package.json scripts (npm run lint).",
   "hooks": {
     "PostToolUse": [
       {
@@ -17,34 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/mle-watcher-hook.sh",
-            "timeout": 10000
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/prompt-polish-auto.sh",
-            "timeout": 10000
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/mle-doctor-auto.sh",
-            "timeout": 10000
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/mle-conversation-capture.sh",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.sh",
             "timeout": 10000
           }
         ]
@@ -57,8 +30,7 @@
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/branch-guard.sh",
-            "timeout": 5000,
-            "_mle_managed": "branch-guard@v2"
+            "timeout": 5000
           }
         ]
       }
@@ -66,9 +38,6 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "mle-hud"
-  },
-  "enabledPlugins": {
-    "python3-development@claude-plugins-official": true
+    "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/statusline.sh\""
   }
 }

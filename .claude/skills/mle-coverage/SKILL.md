@@ -1,42 +1,59 @@
 ---
 name: mle-coverage
-description: 'Design coverage analysis — measure how well design artefacts address requirements with per-requirement scoring.'
-type: flexible
-archetype: cli-wrapper-thin
-priority: medium
-maturity: L2
-keywords:
-  - 'design coverage'
-  - 'are requirements covered'
-  - 'design readiness'
-  - 'coverage analysis'
-  - 'requirement coverage'
-  - 'mle coverage'
-intent_patterns:
-  - "(check|analyse|measure)\\s+design\\s+coverage"
-  - "(are|which)\\s+requirements\\s+covered"
+description: 'Design coverage analysis for DayONE — assess how well the design artefacts and tests address each requirement, with a per-requirement coverage table, gaps, and recommendations.'
 ---
 
-# MLE Design Coverage
+# Design Coverage
 
-Analyse how well design artefacts (ADRs, API specs, diagrams, threat models) cover the requirements for an Epic. Produces per-requirement coverage scores and an overall design readiness metric.
+Assess how completely the **design artefacts** (ADRs, architecture sketch, Zod contracts,
+threat model) and **planned tests** address every requirement. The output is a
+per-requirement coverage table that flags gaps before implementation starts.
 
-## When to Use
+## When to use
 
-- After design artefacts are created
-- When the user says "design coverage", "are requirements covered", "design readiness", or "/mle-coverage"
-- As a quality gate before implementation
-- During design review
+- After design artefacts exist (see `/mle-design`) and before implementation.
+- The user says "design coverage", "are the requirements covered", "design readiness", or
+  "/mle-coverage".
+- As a quality gate at the design → implementation boundary.
 
-## Workflow
+## Method
 
-1. **Analyse coverage**: `mle design coverage --epic <ID> --project <name>` — full coverage analysis
-2. **Check readiness**: Review the design_ready flag and blocker list
-3. **Address gaps**: Focus on requirements with readiness < 40% (blockers)
+1. **List every requirement** — each user story, acceptance criterion, and NFR from
+   `/mle-req`. These are the rows of the matrix; process **all** of them, never a sample.
+2. **Map artefacts to each requirement** across four dimensions:
+   - **Decision** — is there an ADR (or an explicit "no decision needed") covering it?
+   - **Contract** — is the data it touches modelled in a `src/shared` Zod schema?
+   - **Component** — does the architecture sketch name where it is implemented (main /
+     preload / shared / renderer / lib)?
+   - **Test** — is there a planned Vitest assertion or Cucumber scenario that proves it?
+3. **Score each requirement** — **Covered** (all relevant dimensions addressed),
+   **Partial** (some addressed, named gap), or **Gap/blocker** (a relevant dimension is
+   missing, e.g. an NFR with no test or contract).
+4. **Recommend remediation** per gap — author the missing ADR, add the Zod schema, name the
+   component, or write the test plan. Security/accessibility NFRs with no mitigation or no
+   test are blockers, not partials.
 
-## Rules
+## Output — coverage table
 
-- Process ALL requirements under the Epic
-- Check functional, NFR, and ADR traceability dimensions
-- Design is ready when overall score >= 80% and no requirement below 40%
-- Use AI for semantic matching when available
+| Requirement  | Decision       | Contract        | Component | Test          | Status              | Gap / action |
+| ------------ | -------------- | --------------- | --------- | ------------- | ------------------- | ------------ |
+| Story/AC/NFR | ADR-NNN / n.a. | schema name / — | layer     | test name / — | Covered/Partial/Gap | …            |
+
+Close with a one-line readiness call: design is ready when every requirement is **Covered**
+and no blocker remains.
+
+## Quality bar & red flags
+
+- Every requirement appears as a row — coverage of a subset is not coverage.
+- A dimension is only "covered" when the artefact genuinely addresses _that_ requirement,
+  not merely exists somewhere.
+- 🚩 An overall "looks fine" that hides a single requirement with no test or no contract.
+- 🚩 A security/accessibility NFR marked Partial when its mitigation or test is absent —
+  that is a blocker.
+
+## Verify
+
+- Row count equals the requirement count from `/mle-req`.
+- Each Gap row names a concrete remediation action and which skill produces it.
+- Test-column claims reconcile with what `/mle-test-gen` would actually generate.
+- Named contracts exist (or are listed to be added) in `src/shared`; `npm run typecheck` stays green.

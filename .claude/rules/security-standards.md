@@ -2,33 +2,34 @@
 
 **Path scope**: `**`
 
-## Secrets Management
+## Secrets
 
-- Never hardcode secrets, tokens, or credentials in source files
-- Approved storage: OS keyring (`keyring` library), environment variables, Azure Key Vault
-- PATs and API keys: read from `~/.mle/config.toml` or env var, never from committed files
-- Git: use `.gitignore` to exclude `.env`, `*.pem`, `*.key`, `credentials.json`
+- Never hardcode secrets/tokens/keys. Provider API keys go through the main-process
+  **SecureStore** (Electron `safeStorage`), never the renderer or committed files.
+- Git-ignore `.env`, `*.pem`, `*.key`. Never log secrets — even at debug level.
 
-## Input Validation
+## Electron hardening (non-negotiable)
 
-| Context                | Required Validation                                             |
-| ---------------------- | --------------------------------------------------------------- |
-| File paths             | Resolve and check within expected directory (no path traversal) |
-| User input (CLI)       | Type-check and bound-check before processing                    |
-| External API responses | Validate schema before unpacking; handle non-200 gracefully     |
-| YAML/JSON/TOML parsing | Wrap in try/except; report file path and line on failure        |
+- `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`,
+  `webSecurity: true`. Strict CSP; the renderer makes no network calls
+  (`connect-src 'none'`). Preload exposes a minimal `contextBridge` surface — never
+  raw `ipcRenderer` or Node globals.
+- Validate every IPC input with Zod before use; return failures as data
+  (`RefreshResult`), never trust the renderer.
 
-## Dependency Security
+## Input & dependencies
 
-- Pin all dependencies in `pyproject.toml` or `requirements.txt`
-- Run `pip-audit` or `safety check` in CI before merge
-- Review new dependencies: check maintenance status, licence, and known CVEs
-- Prefer stdlib over third-party where functionality is equivalent
+- Validate external/file input: schema-check via Zod; reject non-finite/≤0; resolve and
+  bound file paths (no traversal).
+- Pin dependencies; run `npm audit` in CI; review new dependencies (maintenance,
+  licence, CVEs). Prefer the platform/stdlib over a new dependency.
 
 ## DON'Ts
 
-- Don't use `eval()`, `exec()`, or `compile()` on untrusted input
-- Don't disable TLS verification (`verify=False` in requests)
-- Don't log sensitive data (passwords, tokens, PII) — even at DEBUG level
-- Don't commit `.env` files, private keys, or service account JSON
-- Don't use `subprocess.run(shell=True)` with user-supplied arguments
+- No `eval` / `new Function` on untrusted input; no `dangerouslySetInnerHTML` without
+  sanitisation; never disable TLS verification or CSP; no `shell: true` with
+  user-supplied arguments.
+
+## See also
+
+- `code-standards.md`, `architecture-standards.md`, `src/main/CLAUDE.md`

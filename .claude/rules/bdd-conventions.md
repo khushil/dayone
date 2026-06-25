@@ -1,59 +1,31 @@
 # BDD Conventions
 
-## Behaviour-Driven Development
+**Path scope**: `features/**`, `tests/steps/**`, `tests/support/**`
 
-This project uses BDD with Gherkin feature files in `tests/Features/`.
+DayONE uses **Cucumber.js** (run `npm run bdd`). Features live in
+`features/*.feature`; step definitions in `tests/steps/*.steps.ts`; the shared
+world and stubs in `tests/support/`.
 
-### Feature File Rules
+## Gherkin style
 
-- Write features in **domain language**, not technical language
-- One Feature per `.feature` file, named after the capability
-- Use `Background` for shared preconditions across scenarios
-- Use `Scenario Outline` with `Examples` for data-driven variations
-- Keep each scenario focused on a single behaviour
+- Write features in **domain language**, not technical detail. One Feature per file.
+- **Given** = precondition, **When** = action, **Then** = expected outcome;
+  **And** / **But** extend the previous step. Use `Scenario Outline` + `Examples`
+  for data-driven cases and `Background` for shared preconditions.
 
-### Gherkin Style
+## Step definitions
 
-- **Given** establishes preconditions (past tense or present state)
-- **When** describes the action under test (present tense)
-- **Then** asserts the expected outcome (should/should be)
-- **And** / **But** extend the previous step type
-- Use data tables for structured input
+- Keep steps thin — delegate to `lib/` and helpers; no duplicated step code.
+- Import `lib/` via **relative paths** (not the `@` alias) to avoid tsx/ESM alias
+  issues at run time.
+- Acceptance scenarios read the frozen fixture via `tests/support`; never the
+  network.
 
-### Step Definition Rules
+## Quality checks
 
-- Step definitions go in `tests/Features/step_definitions/`
-- One step file per feature or domain area
-- Keep step implementations thin — delegate to helper functions
-- Use parameterised parsers for reusable steps
-- Share common steps via a `conftest.py` or shared steps file
+- Scenarios are readable by non-technical stakeholders; no implementation detail
+  leaks into Gherkin; Examples cover boundary conditions.
 
-### Test Organisation
+## See also
 
-- **Smoke tests**: Tag with `@smoke` for quick validation
-- **Regression tests**: Tag with `@regression` for full suite
-- **Work-in-progress**: Tag with `@wip` for incomplete scenarios
-- Run by tag: `pytest -m "smoke"` or `behave --tags=@smoke`
-
-### Category-Based Execution (from ESCALUS 12.4)
-
-```bash
-# Run only smoke tests
-pytest tests/Features/ -m smoke
-
-# Run all except WIP
-pytest tests/Features/ -m "not wip"
-
-# Run specific feature
-pytest tests/Features/features/order_placement.feature
-```
-
-### Quality Checks
-
-When reviewing BDD tests:
-
-- Scenarios are readable by non-technical stakeholders
-- No implementation details leak into Gherkin steps
-- Step definitions are DRY (no duplicated step code)
-- Feature files have meaningful descriptions
-- Examples tables cover boundary conditions
+- `tests/CLAUDE.md`, `testing-standards.md`

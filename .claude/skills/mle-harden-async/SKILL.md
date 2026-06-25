@@ -1,142 +1,97 @@
 ---
 name: mle-harden-async
-description: 'Audit async code for unhandled task exceptions, missing cancellation, blocking calls, and resource leaks.'
-type: flexible
-archetype: methodology-pure
-priority: medium
-maturity: L2
+description: 'Audit TypeScript async code — find missing awaits, floating promises, unhandled rejections, race conditions, missing cancellation/cleanup, and main/renderer-thread blocking.'
 keywords:
   - 'harden async'
   - 'async audit'
   - 'check async'
-  - 'async safety'
-  - 'task leak'
-  - 'fire and forget'
-  - 'async hardening'
-  - 'mle harden-async'
+  - 'floating promise'
+  - 'unhandled rejection'
 intent_patterns:
-  - "(harden|audit|review|check)\\s+(async|asyncio|concurrent)\\s+(code|safety)?"
-  - "(find|detect)\\s+(async|task)\\s+(leak|bug|issue)"
+  - "(harden|audit|review|check)\\s+(async|promise|concurrent)\\s+(code|safety)?"
+  - "(find|detect)\\s+(async|promise)\\s+(leak|bug|issue|rejection)"
 ---
 
 # Harden Async
 
-Review all async code for safety pitfalls: fire-and-forget tasks, swallowed cancellation, blocking calls in coroutines, and leaked resources.
+Review DayONE's async code for safety pitfalls: floating promises, missing
+awaits, unhandled rejections, races, missing cancellation/cleanup, and work that
+blocks the Electron main or renderer thread. Report only.
 
 ## When to Use
 
-- When reviewing async code (asyncio, Textual workers, background daemons)
-- When the user says "check async", "harden async", "find async bugs", or "/mle-harden-async"
-- After adding new async tasks or background workers
-- When investigating hangs, deadlocks, or resource leaks
+- After adding async IPC handlers, data-fetch logic, or React effects.
+- When the user says "check async", "harden async", or "/mle-harden-async".
+- When investigating hangs, stale state, or unhandled-rejection warnings.
 
 ## Workflow
 
-### Step 1: Discover
+1. **Discover** — inventory every `async` function, `await`, `.then(`/`.catch(`,
+   `Promise.all`/`allSettled`/`race`, `useEffect`, and `AbortController` site in
+   scope (default `src/`, skip `*.test.ts(x)`). Report "Found N async sites."
+2. **Classify** — group by kind: promise-producing call, React effect, IPC
+   handler, event/listener, aggregation (`Promise.all`).
+3. **Analyse** — score each against the table below.
+4. **Cross-reference** — for every long-lived listener, timer, or fetch: confirm
+   a cancellation path (`AbortController`, effect cleanup return, `removeListener`)
+   and that cleanup runs on unmount/teardown.
+5. **Report** — health score out of 10; start at 10, −2 per BLOCKER, −1 per
+   WARNING, −0.5 per INFO (floor 0).
 
-Find all async functions, coroutines, and task-creating calls in scope. Build an inventory grouped by file. Report: "Found N async sites across M files."
+## Pattern Table
 
-### Step 2: Classify
+| Pattern                                                                 | Severity | Message                                                                      |
+| ----------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| Promise-returning call with no `await`/`void`/`.then` (floating)        | BLOCKER  | Floating promise — rejection is unobserved; `await` it or mark `void`        |
+| `async` passed where a sync callback is expected (e.g. effect body)     | BLOCKER  | Returned promise is ignored — wrap an inner async fn; effects can't be async |
+| `await` missing before a promise whose result is then used              | BLOCKER  | Missing await — downstream reads a Promise, not its value                    |
+| `useEffect` starting async work with no cleanup/cancellation            | BLOCKER  | Effect leaks — return cleanup; abort in-flight work with AbortController     |
+| State set after `await` without checking the component is still mounted | WARNING  | Possible set-after-unmount race — guard with an abort/mounted flag           |
+| `Promise.all` where one rejection should not cancel the rest            | WARNING  | Use `Promise.allSettled` when partial results are acceptable                 |
+| Long CPU loop / sync IO on main or renderer thread                      | WARNING  | Blocks the event loop / UI — offload or chunk the work                       |
+| Unawaited `Promise.all`/`race` result                                   | WARNING  | Aggregate promise floats — await or handle it                                |
+| `await` inside a loop where calls are independent                       | INFO     | Serialised awaits — consider `Promise.all` for concurrency                   |
+| No timeout/abort on an awaited external operation                       | INFO     | Unbounded await may hang — add an AbortSignal or timeout                     |
 
-Categorise each site by pattern type: task creation (`create_task`, `ensure_future`, `TaskGroup`), context manager (`async with`, `__aenter__`), event handler (`on_event`, signal handlers), worker (Textual `run_worker`, `@work`, background loops), gather (`asyncio.gather`, `asyncio.wait`), or server (`serve_forever`, listener loops).
+IPC failures must surface as a discriminated `RefreshResult`, not a rejected
+promise crossing the process boundary (see mle-error-audit).
 
-### Step 3: Analyse
-
-Check each site against the async safety pattern table.
-
-| Pattern                                                                    | Severity | Message                                              |
-| -------------------------------------------------------------------------- | -------- | ---------------------------------------------------- |
-| `create_task()` without exception handling                                 | BLOCKER  | Fire-and-forget — unhandled exceptions silently lost |
-| Bare `try/except` swallows `CancelledError`                                | BLOCKER  | Swallowed cancellation prevents graceful shutdown    |
-| Blocking call (`time.sleep`, `open()`, `subprocess.run`) in async function | BLOCKER  | Blocking call freezes the event loop                 |
-| Async context manager without `async with`                                 | WARNING  | Resource may leak without proper cleanup             |
-| No timeout on `await` to external services                                 | WARNING  | Unbounded await may hang indefinitely                |
-| `asyncio.gather()` without `return_exceptions=True`                        | WARNING  | First exception cancels remaining tasks              |
-| Task created but never awaited or stored                                   | WARNING  | Orphaned task may be garbage-collected               |
-| No graceful shutdown for background tasks                                  | INFO     | No cancellation path for long-running task           |
-| `threading.Lock` in async context                                          | INFO     | Sync lock in async code — use `asyncio.Lock`         |
-
-### Step 4: Cross-Reference
-
-For every long-running task or background loop: verify a cancellation handler exists, verify `CancelledError` is re-raised (not swallowed), and verify cleanup runs in a `finally` block.
-
-### Step 5: Report
+## Report Format
 
 ```
-## Async Hardening Report
-
-**Async Health**: {SCORE}/10
-**Sites audited**: {N} across {M} files
+## Async Hardening — {score}/10
+**Sites audited**: N across M files
 
 ### Inventory
-- Task creation: {n}  - Context managers: {n}  - Workers: {n}
-- Event handlers: {n}  - Gather calls: {n}  - Servers: {n}
+- Promises: n  - Effects: n  - IPC handlers: n  - Aggregations: n
 
 ### Findings
-| Severity | File | Line | Pattern | Message | Fix |
-|----------|------|------|---------|---------|-----|
+| Severity | File:Line | Pattern | Fix |
+|----------|-----------|---------|-----|
 
 ### Top 3 Hardening Recommendations
-1. ...
+1. …
 ```
-
-Scoring: start at 10, subtract 2 per BLOCKER, 1 per WARNING, 0.5 per INFO (minimum 0).
-
-## Specific Techniques
-
-| Situation                                                                       | Technique                                                                                                                                                                      | Reference                         |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
-| Audit must enumerate every `async def` and task-creating call                   | Walk the AST with `ast.parse`; record every `AsyncFunctionDef`, `Call(func=Attribute(attr="create_task"))`, `Call(func=Attribute(attr="ensure_future"))`, and `AsyncWith` node | `<your-repo>/src/<your-package>/` |
-| `asyncio.create_task(coro)` without a strong reference is GC-collectable        | Match `Expr(value=Call(...create_task...))` where the result is not assigned to a name held by `self` or a module-level set                                                    | Python docs on `create_task`      |
-| `time.sleep()` or `requests.get()` inside an `async def` blocks the event loop  | Inspect every `Call` inside an `AsyncFunctionDef` body; flag identifiers from a blocking-API allowlist (`time.sleep`, `requests.*`, `subprocess.run`, `open(...).read`)        | Project error-handling guidelines |
-| `asyncio.shield(coro)` swallows cancellation when not re-checked                | Detect `Call(func=Attribute(attr="shield"))` and verify the enclosing function re-raises `CancelledError` on its own cancellation path                                         | Python `asyncio.shield` docs      |
-| Textual `@work` decorator without `exclusive=True` may stack workers            | Find `FunctionDef` nodes decorated with `@work(...)`; flag when the keyword `exclusive` is absent                                                                              | Textual workers documentation     |
-| `loop.run_in_executor(None, blocking_fn)` returns a Future that must be awaited | Walk every `run_in_executor` call; flag when the return value is discarded or not awaited within the same scope                                                                | asyncio executor docs             |
-
-## Common Rationalizations
-
-| The agent thinks…                                                                                        | Actually…                                                                                                                                                                                                                                                                                                    | Gate                            | Corpus |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- | ------ |
-| "Blocking call is short — won't show on the P95 latency graph."                                          | Short-blocking calls compound. Three short sync calls per request multiply at concurrency; what's invisible at P95 single-user is severe at P95 with twenty concurrent requests. The discipline is to never block in async paths, not to argue how short is short enough.                                    | `wi-validator:rubric-threshold` |        |
-| "Cancellation handling is paranoid for a 100 ms task — it'll have completed before the cancel can fire." | Race conditions are not size-bounded. The 100 ms task can be in flight when a parent cancellation arrives; without explicit cancellation handling the task leaks its resources and the parent's exception swallows quietly. Cancellation-awareness is a contract, not a paranoia.                            | `merge-check:pr-completed`      |        |
-| "Default timeout is sensible — an explicit timeout on this call would just be noise."                    | Defaults vary by library and version; relying on them couples your code to whatever the library's maintainer decides next release. An explicit timeout is documentation as much as behaviour — it makes the upper bound visible at the call site. Ruff's S110 family flags this pattern for the same reason. | `pre-commit:ruff`               |        |
 
 ## Red Flags
 
-- Audit run on an async codebase reports zero unawaited coroutines, yet `python -W error::RuntimeWarning -m pytest` surfaces "coroutine was never awaited" warnings
-- `asyncio.create_task(...)` calls exist where the return value is discarded, but the audit classifies them as INFO rather than WARNING
-- `time.sleep(...)` appears inside an `async def` body and the audit reports no BLOCKER finding
-- Cancellation pathways through `asyncio.shield` are not flagged when the enclosing function lacks a `CancelledError` handler
-- Audit re-run on the same SHA produces a different `BLOCKER` count
+- A floating promise exists but the audit reports zero BLOCKERs.
+- `useEffect(async () => …)` flagged as INFO rather than BLOCKER.
+- An effect starts a fetch with no `AbortController` and no cleanup return.
+- Re-run on the same tree yields a different BLOCKER count.
 
 ## Verification
 
 ```bash
-# Audit run with structured output
-<your-tool> harden-async --skill | jq '.findings[] | select(.severity == "BLOCKER")'
-
-# Audit surface matches the codebase's async footprint
-grep -rnE 'asyncio\.create_task|loop\.run_in_executor|async def' src/ | wc -l
-<your-tool> harden-async --skill | jq '.metrics.async_sites_scanned'
-# Both numbers must align (audit count >= grep count)
-
-# Cross-check against pytest runtime warnings
-python -W error::RuntimeWarning -m pytest tests/ -q 2>&1 | grep -E "coroutine was never awaited" | wc -l
+ast-grep run -p 'useEffect(async () => { $$$ })' src/        # async effect bodies
+rg -n "\.then\(|Promise\.all\(|Promise\.race\(" src/         # aggregation sites
+npm run lint && npm run typecheck                            # @typescript-eslint/no-floating-promises
 ```
-
-Observable evidence:
-
-- `<your-tool> harden-async --skill` exits with code 0 and emits JSON with `findings`, `metrics`, and `inventory` keys
-- Each BLOCKER row carries `file`, `line`, and `pattern_id` fields
-- `metrics.async_sites_scanned` is at least equal to `grep -c 'async def' src/`
-- The inventory categories sum to the total site count
-- Re-running on the same SHA produces a byte-identical JSON report
 
 ## Rules
 
-- **Process ALL async code** — never sample or truncate; audit every async site in scope
-- **Framework-aware** — distinguish between asyncio, Textual, and other async frameworks
-- **Skip test code** — do not flag patterns in `tests/` (tests may intentionally test failure paths)
-- **British English** — use British English in all findings (e.g. "analyse", "behaviour")
-- **No auto-fix** — report findings and recommendations only; let the developer decide
-- **Deterministic** — same codebase always produces the same report and score
+- **Process ALL async sites** in scope — never sample.
+- **Skip tests** — `*.test.ts(x)` may exercise failure/race paths deliberately.
+- **British English** in findings ("analyse", "behaviour").
+- **No auto-fix** — report findings and recommendations only.
+- **Deterministic** — the same tree yields the same report and score.

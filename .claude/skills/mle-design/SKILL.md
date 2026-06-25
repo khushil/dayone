@@ -1,106 +1,64 @@
 ---
 name: mle-design
-description: 'Design engine — generate ADRs, architecture diagrams, API specs, threat models, and design reviews from requirements.'
-type: flexible
-archetype: methodology-cli-orchestrating
-priority: high
-maturity: L2
-keywords:
-  - 'create ADR'
-  - 'design API'
-  - 'generate diagram'
-  - 'review design'
-  - 'threat model'
-  - 'architecture decision'
-  - 'design review'
-  - 'mle design'
-intent_patterns:
-  - "(create|generate|write)\\s+(an?\\s+)?(ADR|design|diagram|API spec)"
-  - "(review|check|analyse)\\s+(the\\s+)?design"
-  - "(threat|security)\\s+model"
+description: 'Design for DayONE features — author MADR ADRs, sketch the component architecture, define the IPC/API contract as Zod schemas in src/shared, and run a lightweight STRIDE threat model, respecting the main/preload/shared/renderer/lib boundaries.'
 ---
 
-# MLE Design
+# Design
 
-Generate and review design artefacts from requirements. Produces Architecture Decision Records, API specifications, diagrams, threat models, and automated design reviews.
+Turn validated requirements into design artefacts: **ADRs** (MADR format), an
+**architecture/component sketch**, the **IPC/API contract as Zod schemas**, and a
+**lightweight threat model**. Design must respect DayONE's process boundaries and land
+before implementation.
 
-## When to Use
+## When to use
 
-- After requirements are generated and validated
-- When the user says "create ADR", "design API", "generate diagram", "review design", or "/mle-design"
-- When you need to verify design coverage against requirements
-- Before implementation phase
+- After requirements exist and pass INVEST (see `/mle-req`).
+- The user says "create an ADR", "design the API/IPC", "threat model", "review the
+  design", or "/mle-design".
+- Before implementation — significant decisions are recorded first.
 
-## Workflow
+## Process boundaries (dependencies flow inward)
 
-1. **Generate ADR**: `mle design adr --story <ID> --project <name>` — produce an ADR
-2. **Generate diagram**: `mle design diagram --story <ID> --project <name>` — produce architecture diagram
-3. **Generate API spec**: `mle design api --story <ID> --project <name>` — produce API specification
-4. **Design review**: `mle design review <artefact-path>` — automated design quality review
-5. **Threat model**: `mle design threat-model --story <ID> --project <name>` — generate threat model
-6. **Coverage check**: `mle design coverage --epic <ID> --project <name>` — measure design coverage
+`src/shared` (Zod only) ← `src/main` (Electron, Node) · `src/preload` (`contextBridge`) ·
+`src/renderer/src` (React/Zustand) ← `src/renderer/src/lib` (**pure** domain logic).
+Cross-process data is defined **once** as Zod schemas in `src/shared`; derive TS types with
+`z.infer`. IPC results travel as a discriminated union (`{ ok: true; data } | { ok: false;
+reason }`) so failures are data, not throws.
 
-## Specific Techniques
+## Method
 
-| Situation                                                  | Technique                                                                                                                   | Reference                             |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| ADR seeded from a Story with ambiguous acceptance criteria | Run `mle req validate --stories <file>` first; refuse to author the ADR until INVEST score >= 3.0                           | `mle-req`                             |
-| Threat model targets an API surface lacking error schemas  | Author the OpenAPI spec via `mle design api ...` first; STRIDE rows then map onto concrete request/response shapes          | `docs/adr/ADR-NNN-*.md` MADR template |
-| Design coverage report flags a requirement at 0%           | Run `mle design coverage --epic <ID> --skill --output coverage.json`; the JSON enumerates uncovered NFRs and ADRs to author | `mle-coverage`                        |
-| Existing ADR superseded by new decision                    | Author a new ADR with `Status: Accepted` and a `Supersedes: ADR-NNN` header; never edit the prior accepted ADR              | `.claude/rules/adr-conventions.md`    |
-| Architecture diagram outdated after package refactor       | Re-run `mle design diagram` with `--source-scan <package-root>` to regenerate from current package boundaries               | `mle-refactor-module`                 |
-| Threat-model row authored without coverage rationale       | Append a `Mitigation:` field citing the gate or code path (e.g. `src/<pkg>/wi_validator.py:DEFAULT_THRESHOLD`)              | gate registry                         |
+1. **Record decisions as ADRs.** For each significant choice (technology, contract,
+   storage, security, or a change to an existing pattern) author a MADR file under
+   `docs/adr/ADR-NNN-kebab-title.md` per `.claude/rules/adr-conventions.md`:
+   **Context · Decision** (active voice, "We will…") **· Consequences** (positive _and_
+   negative) **· Alternatives** (≥ 2, with why-rejected). New ADRs start `Proposed`; flip to
+   `Accepted` only on PR merge. Supersede — never edit — an accepted ADR, and update
+   `docs/adr/README.md`.
+2. **Sketch the architecture.** Name the components and where each lives (main / preload /
+   shared / renderer / lib) and how data flows: `data/sectors.json` → main loads & validates
+   → IPC → renderer store → `lib/` computes → components render. Keep range-dependent maths
+   in pure `lib/` functions that take an explicit `asOf`/anchor argument.
+3. **Define the contract as Zod.** Write or extend the `src/shared` schemas for any new
+   cross-process payload; express IPC results as the discriminated union above. State the
+   `4xx/5xx`-equivalent failure `reason`s as named union members, not thrown errors.
+4. **Threat model (STRIDE-lite).** For each new data flow walk Spoofing, Tampering,
+   Repudiation, Information disclosure, Denial of service, Elevation of privilege. Each
+   relevant row names a concrete **mitigation** tied to a control: `contextIsolation: true`,
+   `nodeIntegration: false`, `sandbox: true`, CSP `connect-src 'none'`, minimal preload
+   surface, Zod validation at the boundary, atomic temp+rename writes to `userData`.
 
-## Common Rationalizations
+## Quality bar & red flags
 
-| The agent thinks…                                                                | Actually…                                                                                                                                                                                                                                                 | Gate                               | Corpus |
-| -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------ |
-| "ADR can land as Accepted because the team agreed in the design review meeting." | An accepted ADR without a merged PR trail breaks the audit chain — reviewers cannot reconstruct the constraint set from `docs/adr/` alone. The MADR Status field flips from Proposed to Accepted only after PR merge with at least one reviewer recorded. | `branch-policy:reviewer-required`  |        |
-| "Skipping the threat model is fine — this feature has no auth surface."          | Threat modelling covers more than authentication: data flow, supply chain, side channels, abuse cases. The STRIDE pass is mandatory at L3+ and absence shows up as zero rows under the security NFRs in `mle design coverage`.                            | `wi-validator:rubric-threshold`    |        |
-| "Design coverage at 65% is close enough — implementation can backfill the gap."  | The 70% threshold encodes that backfill rarely happens; ADR-only requirements drift unimplemented and surface six sprints later as scope risk. Raise to threshold before implementation, or file a Spike for the gap.                                     | `skill-validator:rubric-threshold` |        |
+- ADRs have all four MADR sections and ≥ 2 real alternatives — not one strawman.
+- No Zod schema lives outside `src/shared`; no parallel hand-maintained `interface`.
+- Failure cases are modelled as union members, not exceptions.
+- Every relevant STRIDE row cites a mitigation control, not just the category name.
+- 🚩 An `Accepted` ADR with no merged PR; a superseded ADR still marked `Accepted` in the
+  index; a contract change that bypasses `src/shared`; a network call anywhere in the app.
 
-## Red Flags
+## Verify
 
-- ADR file lands on `origin/main` with `Status: Accepted` but `az repos pr show --id <pr> --query 'reviewers'` returns an empty array — the merge bypassed the reviewer policy
-- Threat-model row cites STRIDE category without a `Mitigation:` field referencing a code path or gate — the dimension is named but not bound to enforcement
-- API spec under `docs/api/` lacks a `responses:` block with `4xx`/`5xx` schemas — error contracts went undocumented
-- `mle design coverage --epic <ID>` reports overall >= 70% but a single requirement shows readiness < 40% — the average hides a blocker
-- ADR uses `Status: Accepted` and `Supersedes: ADR-NNN` but the prior ADR is still `Accepted` in `docs/adr/README.md` index — the supersession was not propagated
-
-## Verification
-
-```bash
-# ADR file exists at the canonical path with MADR sections
-test -f docs/adr/ADR-NNN-feature-design.md
-grep -E '^## (Context|Decision|Consequences|Alternatives)' \
-  docs/adr/ADR-NNN-feature-design.md | wc -l   # expect 4
-
-# --skill JSON output is parseable and non-empty
-mle design adr --story <story-id> --project <name> --skill \
-  --output /tmp/adr.json
-test -s /tmp/adr.json && python -c 'import json,sys; json.load(open("/tmp/adr.json"))'
-
-# Coverage report at or above the SDLC gate threshold
-mle design coverage --epic <epic-id> --project <name> --skill \
-  --output /tmp/cov.json
-python -c 'import json; r=json.load(open("/tmp/cov.json")); \
-  assert r["overall_score"] >= 0.70, r'
-
-# PR trail exists for every Accepted ADR
-az repos pr list --query '[?contains(title, `ADR-`)].pullRequestId' -o tsv
-```
-
-Observable evidence:
-
-- `docs/adr/ADR-NNN-*.md` files exist on disk with the four MADR section headings
-- `mle design --skill` JSON parses and carries `artefact_path`, `story_id`, `status` fields
-- `mle design coverage --skill` reports `overall_score >= 0.70` and no requirement under `0.40`
-- Every Accepted ADR has a corresponding merged PR returned by `az repos pr list`
-- `docs/adr/README.md` index entry for any superseded ADR shows `~~ADR-NNN~~` strike-through plus the superseding link
-
-## Rules
-
-- Requirements must exist before design
-- Every design decision should be recorded as an ADR
-- Threat models are mandatory for security-sensitive features
-- Design review must pass before implementation
+- `ls docs/adr/` shows the new `ADR-NNN-*.md`; each has Context/Decision/Consequences/Alternatives.
+- New/changed schemas compile: `npm run typecheck`; lint clean: `npm run lint`.
+- The threat model has at least one mitigated row per new data flow.
+- Hand the artefacts to `/mle-coverage` to confirm every requirement is addressed.
