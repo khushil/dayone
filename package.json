@@ -1,6 +1,6 @@
 {
   "name": "sectorscope",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Track 12-month stock performance by market sector — a cross-platform desktop utility.",
   "main": "./out/main/index.js",
   "author": "Khushil Dep",
@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
+    "electron-updater": "^6.8.9",
     "lucide-react": "^1.21.0",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3",

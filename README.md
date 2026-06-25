@@ -41,9 +41,15 @@ npm run dev      # launches the app (needs a display)
 
 Prices come from the Yahoo Finance chart endpoint (no API key, adjusted close). The committed `data/sectors.json` is the **canonical, offline** path; `fetch-data` is best-effort and should be verified from Node on the demo machine beforehand — **don't fetch live during a presentation**.
 
-## Packaging
+## Packaging & releases
 
-Cross-OS installers must be built on their target OS (or CI): `build:mac` on macOS, `build:win` on Windows. CI (`.github/workflows/ci.yml`) runs lint + typecheck + tests + BDD + build on Linux, Windows, and macOS.
+Cross-OS installers must be built on their target OS (or CI): `build:mac` on macOS, `build:win` on Windows. CI (`.github/workflows/ci.yml`) runs lint + typecheck + tests + BDD + build on Linux, Windows, and macOS. Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds each installer and publishes **one** GitHub Release with the `.dmg` + `.exe`.
+
+## Updates
+
+The app **auto-updates in place** via `electron-updater` — no uninstall/reinstall. On launch it checks the GitHub Releases of this repo, downloads a newer version in the background, and offers to restart (also applying it on the next quit). To ship an update, bump the version and push a new `v*` tag.
+
+> Windows (NSIS) auto-update works for unsigned builds. macOS auto-update requires a **signed + notarized** app, so the unsigned demo build can't self-update on macOS — Mac users download the new `.dmg`.
 
 ## License
 
