@@ -6,11 +6,11 @@ import type {
 } from '../../src/shared/types';
 
 /**
- * Per-scenario state for SectorScope acceptance tests. Steps load the frozen
+ * Per-scenario state for DayONE acceptance tests. Steps load the frozen
  * fixture into `data` and record the range/selection under test, then assert on
  * values derived by the `lib/` domain functions.
  */
-export class SectorScopeWorld extends World {
+export class DayoneWorld extends World {
   data?: SectorData;
   range: TimeRange = '12M';
   fetchImpl?: typeof fetch;
@@ -27,4 +27,4 @@ export class SectorScopeWorld extends World {
   }
 }
 
-setWorldConstructor(SectorScopeWorld);
+setWorldConstructor(DayoneWorld);

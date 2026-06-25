@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Shared contracts for SectorScope, imported by the main, preload, and renderer
+ * Shared contracts for DayONE, imported by the main, preload, and renderer
  * processes. Zod schemas are the single validator used at both data load and
  * refresh; the TypeScript types are inferred from them so they never drift.
  *
@@ -52,7 +52,7 @@ export type RefreshResult =
   | { ok: false; reason: string };
 
 /** The minimal, typed surface the preload exposes on `window.api`. */
-export interface SectorScopeApi {
+export interface DayoneApi {
   /** Load the committed snapshot (or the last good refreshed copy). */
   loadData(): Promise<RefreshResult>;
   /** Best-effort refresh from the network; keeps last-good data on failure. */

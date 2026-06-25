@@ -10,7 +10,7 @@ import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 
 /**
- * SectorScope lint config — the Google TypeScript Style Guide
+ * DayONE lint config — the Google TypeScript Style Guide
  * (https://google.github.io/styleguide/tsguide.html) encoded as an ESLint 9
  * flat config. ESLint enforces the mechanical rules; Prettier owns formatting.
  * See docs/CODING_STANDARDS.md for what is tool-enforced vs guide convention.

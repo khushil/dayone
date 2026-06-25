@@ -1,6 +1,6 @@
 # Coding standards
 
-SectorScope follows the **[Google style guides](https://google.github.io/styleguide/)** and enforces them automatically. This document records what is mechanically enforced, what is convention, our two deliberate deviations, and how enforcement is wired into Claude Code.
+DayONE follows the **[Google style guides](https://google.github.io/styleguide/)** and enforces them automatically. This document records what is mechanically enforced, what is convention, our two deliberate deviations, and how enforcement is wired into Claude Code.
 
 ## Guides we adopt
 

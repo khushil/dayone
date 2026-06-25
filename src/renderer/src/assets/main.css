@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
- * SectorScope design system — a refined "market terminal".
+ * DayONE design system — a refined "market terminal".
  * Tokens are CSS custom properties so light/dark and the colorblind-safe
  * (CVD) mode can swap them at runtime via [data-theme] / [data-cvd].
  */

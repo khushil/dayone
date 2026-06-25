@@ -1,6 +1,6 @@
 # Requirements
 
-The living specification SectorScope is built against. Each requirement has an acceptance criterion that maps to a Vitest unit test and/or a Cucumber scenario. Value-asserting tests read the **frozen fixture** (`tests/fixtures/sectors.fixture.json`), never the refreshable data.
+The living specification DayONE is built against. Each requirement has an acceptance criterion that maps to a Vitest unit test and/or a Cucumber scenario. Value-asserting tests read the **frozen fixture** (`tests/fixtures/sectors.fixture.json`), never the refreshable data.
 
 > Fixture facts (by construction, deterministic): **best = Technology** (+23.9%), **worst = Energy** (−7.0%), **breadth = 8 / 11 advancing**.
 

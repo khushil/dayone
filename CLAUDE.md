@@ -1,4 +1,4 @@
-# SectorScope
+# DayONE
 
 A cross-platform (Windows 11 + macOS) desktop utility that visualizes **12-month stock performance by market sector**. Electron + React 19 + TypeScript. Built as a live demonstration of an AI-assisted SDLC: requirements → BDD/TDD → enforced standards → review → CI.
 

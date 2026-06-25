@@ -9,7 +9,7 @@ export function Topbar(): React.JSX.Element {
     <header className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
       <div className="flex items-baseline gap-3">
         <span className="font-display text-xl">
-          Sector<span className="text-accent">Scope</span>
+          Day<span className="text-accent">ONE</span>
         </span>
         <span className="hidden text-[0.7rem] tracking-[0.2em] text-muted uppercase sm:inline">
           12-month sector performance
