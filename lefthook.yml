@@ -1,0 +1,6 @@
+# Local fast feedback only — CI commitlint on the PR title is the enforced gate.
+# Bypassable with --no-verify; installs via the package.json "prepare" script.
+commit-msg:
+  commands:
+    commitlint:
+      run: npx --no-install commitlint --edit {1}

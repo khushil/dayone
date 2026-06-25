@@ -20,6 +20,10 @@ Data flows: `data/sectors.json` (committed snapshot, canonical/offline) → main
 
 We follow the **Google TypeScript Style Guide** — full detail and the two documented deviations in `docs/CODING_STANDARDS.md`. Essentials: `const`/`===`, **named exports only** in `src/**`, prefer `unknown` over `any`, `interface` for object shapes, `/** JSDoc */` on exported API. Formatting is Prettier's job — don't hand-format. A `PostToolUse` hook auto-fixes and lints every file you edit; keep the build green.
 
+## Commits & versioning — Conventional Commits + SemVer
+
+Every commit and **PR title** follows [Conventional Commits](https://www.conventionalcommits.org): `feat:`/`fix:`/`docs:`/`refactor:`/`test:`/`ci:`/`chore:`; a breaking change is `feat!:` or a `BREAKING CHANGE:` footer. **Versions are derived, never hand-edited** — `release-please` bumps `package.json` + `CHANGELOG.md` and cuts the release; do not run `npm version` or push `v*` tags. `commitlint` (CI on the PR title, local `lefthook` hook) enforces the format. PRs are **squash-merged**, so write the PR title as the release-worthy summary.
+
 ## Cross-cutting invariants
 
 - **Frozen fixture**: value-asserting tests read `tests/fixtures/sectors.fixture.json`; nothing in the app or fetch path ever writes there, so refreshing data can't turn tests red.
